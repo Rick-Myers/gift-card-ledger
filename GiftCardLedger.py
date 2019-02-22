@@ -8,7 +8,7 @@ class GiftCardLedger(tk.Tk):
         super().__init__()
 
         self.title("Gift Card Ledger")
-        self.geometry("400x600")
+        self.geometry("350x500")
 
         # Screen label that appears at the top. It displays what screen is currently active.
         self.top_label_var = tk.StringVar(self)
@@ -16,6 +16,10 @@ class GiftCardLedger(tk.Tk):
         self.top_label.pack(side=tk.TOP, fill=tk.X)
         # todo set the label when the screen is selected?
         self.top_label_var.set("Gift Card Ledger")
+
+        # todo add a frame for the listbox, listbox should allow access to card editing screen
+
+        # todo add a frame for a button to add a gift card
 
 
 if __name__ == "__main__":
