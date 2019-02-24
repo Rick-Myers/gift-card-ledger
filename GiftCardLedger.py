@@ -1,12 +1,16 @@
 import tkinter as tk
-from tkinter import filedialog
 from tkinter import PhotoImage
-import tkinter.messagebox as msg
+from GiftCard import GiftCard
 
 
 class GiftCardLedger(tk.Tk):
-    def __init__(self):
+    def __init__(self, cards=None):
         super().__init__()
+
+        if not cards:
+            self.cards = []
+        else:
+            self.cards = cards
 
         # Screen label that appears at the top. It displays what screen is currently active.
         self.top_label_var = tk.StringVar(self)
@@ -32,13 +36,19 @@ class GiftCardLedger(tk.Tk):
         self.canvas_frame = self.cards_canvas.create_window((0, 0), window=self.cards_list_frame, anchor="n")
 
         # Temporary value to add to the list of cards
-        todo1 = tk.Label(self.cards_list_frame, text="Card A       $23.74", bg="lightgrey",
-                         fg="black", pady=10)
-        todo1.pack(side=tk.TOP, fill=tk.X)
+        test_card = GiftCard(self.cards_list_frame, "Test Card", 23.74,
+                             "lightgrey", "black", 10)
+        self.cards.append(test_card)
+
+        for card in self.cards:
+            card.pack(side=tk.TOP, fill=tk.X)
 
         # set bounding box to be consisted with card frame within card canvas...more binds to comes
         self.bind("<Configure>", self.on_frame_configure)
-        self.cards_canvas.bind("<Configure>", self.task_width)
+        self.cards_canvas.bind("<Configure>", self.card_width)
+        self.bind_all("<MouseWheel>", self.mouse_scroll)
+        self.bind_all("<Button-4>", self.mouse_scroll)
+        self.bind_all("<Button-5>", self.mouse_scroll)
 
         # button used to add cards to card list. will launch another window to prompt for data
         self.button_photo = PhotoImage(file="assets/add_symbol.png")
@@ -50,11 +60,33 @@ class GiftCardLedger(tk.Tk):
         self.colour_schemes = [{"bg": "lightgrey", "fg": "black"}, {"bg": "grey", "fg": "white"}]
 
     def on_frame_configure(self, event=None):
+        '''Reconfigure the canvas scroll region when the window is configured
+        or a new card is added to the card frame.'''
         self.cards_canvas.configure(scrollregion=self.cards_canvas.bbox("all"))
 
-    def task_width(self, event):
+    def card_width(self, event):
+        '''Reconfigure the width of the canvas when the window is modified.'''
         canvas_width = event.width
         self.cards_canvas.itemconfig(self.canvas_frame, width=canvas_width)
+
+    def add_card(self, name, balance, event=None, from_db=False):
+        '''Add a new GiftCard to the card list.'''
+        pass
+        # todo finish add card
+        #card = GiftCard(self.cards_list_frame, name, balance, bg, fg, pady)
+
+    def mouse_scroll(self, event):
+        '''Scrolls the card canvas'''
+        if event.delta:
+            self.cards_canvas.yview_scroll(-1*(event.delta/120), "units")
+        else:
+            if event.num == 5:
+                move = 1
+            else:
+                move = -1
+
+            self.cards_canvas.yview_scroll(move, "units")
+
 
 if __name__ == "__main__":
     gift_card_ledger = GiftCardLedger()
