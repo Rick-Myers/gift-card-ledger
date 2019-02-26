@@ -1,96 +1,102 @@
+__author__ = "Rick Myers"
+
 import tkinter as tk
 from tkinter import PhotoImage
 from GiftCard import GiftCard
+from AddCardDialogueWindow import AddCardDialogueWindow
 
 
 class GiftCardLedger(tk.Tk):
-    def __init__(self, cards=None):
-        super().__init__()
-
-        if not cards:
-            self.cards = []
-        else:
-            self.cards = cards
-
-        # Screen label that appears at the top. It displays what screen is currently active.
-        self.top_label_var = tk.StringVar(self)
-        self.top_label = tk.Label(self, textvar=self.top_label_var, fg="black", bg="white", font=('Terminal', 28))
-        self.top_label.pack(side=tk.TOP, fill=tk.X)
-        # todo set the label when the screen is selected?
-        self.top_label_var.set("Gift Card Ledger")
-
-        # Create a canvas
-        self.cards_canvas = tk.Canvas(self)
-        # Create a frame to hold the list of cards
-        self.cards_list_frame = tk.Frame(self.cards_canvas)
-        # The scrollbar will be used when the card list it too long to view on screen.
-        self.scrollbar = tk.Scrollbar(self.cards_canvas, orient="vertical", command=self.cards_canvas.yview)
-        self.cards_canvas.configure(yscrollcommand=self.scrollbar.set)
+    # todo adjust frame colors after layout is complete
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
 
         self.title("Gift Card Ledger")
-        self.geometry("350x500")
-        # The card canvas is packed to the top of the root window along with the scrollbar
-        self.cards_canvas.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        # Draw a window within the canvas, this is where the card list frame will display
-        self.canvas_frame = self.cards_canvas.create_window((0, 0), window=self.cards_list_frame, anchor="n")
+        self.configure(background="Gray")
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
 
-        # Temporary value to add to the list of cards
-        test_card = GiftCard(self.cards_list_frame, "Test Card", 23.74,
-                             "lightgrey", "black", 10)
-        self.cards.append(test_card)
+        main_frame = tk.Frame(self, bg="Light Blue", bd=3, relief=tk.RIDGE)
+        main_frame.grid(sticky=tk.NSEW)
+        main_frame.columnconfigure(0, weight=1)
 
-        for card in self.cards:
-            card.pack(side=tk.TOP, fill=tk.X)
+        # Screen label that appears at the top. It displays what screen is currently active.
+        # todo remove and use simple menu
+        top_label_var = tk.StringVar(main_frame)
+        top_label = tk.Label(main_frame, textvar=top_label_var, fg="black", bg="white", font=('Terminal', 20))
+        top_label.grid(row=0, column=0, pady=5, sticky=tk.NW)
+        top_label_var.set("Gift Card Ledger")
 
-        # set bounding box to be consisted with card frame within card canvas...more binds to comes
-        self.bind("<Configure>", self.on_frame_configure)
-        self.cards_canvas.bind("<Configure>", self.card_width)
-        self.bind_all("<MouseWheel>", self.mouse_scroll)
-        self.bind_all("<Button-4>", self.mouse_scroll)
-        self.bind_all("<Button-5>", self.mouse_scroll)
+        # Create a frame for the canvas and scrollbar.
+        canvas_frame = tk.Frame(main_frame)
+        canvas_frame.grid(row=2, column=0, sticky=tk.NW)
 
-        # button used to add cards to card list. will launch another window to prompt for data
-        self.button_photo = PhotoImage(file="assets/add_symbol.png")
-        self.add_card_button = tk.Button(self, image=self.button_photo, width=100, height=100,
-                                         font='Terminal')
-        self.add_card_button.pack()
+        # Add a canvas into the canvas frame.
+        card_list_canvas = tk.Canvas(canvas_frame, bg="Yellow")
+        card_list_canvas.grid(row=0, column=0)
 
-        # alternating color scheme to allow labels to be more visible
-        self.colour_schemes = [{"bg": "lightgrey", "fg": "black"}, {"bg": "grey", "fg": "white"}]
+        # Create a vertical scrollbar linked to the canvas.
+        scrollbar = tk.Scrollbar(canvas_frame, orient=tk.VERTICAL, command=card_list_canvas.yview)
+        scrollbar.grid(row=0, column=1, sticky=tk.NS)
+        card_list_canvas.configure(yscrollcommand=scrollbar.set)
 
-    def on_frame_configure(self, event=None):
-        '''Reconfigure the canvas scroll region when the window is configured
-        or a new card is added to the card frame.'''
-        self.cards_canvas.configure(scrollregion=self.cards_canvas.bbox("all"))
+        # Create a frame on the canvas to contain the list of cards.
+        cards_list_frame = tk.Frame(card_list_canvas, bg="Red", bd=2)
+        # todo add as global variables?
+        cards_list_frame.columnconfigure(0, {'minsize': 200, 'pad': 10})
 
-    def card_width(self, event):
-        '''Reconfigure the width of the canvas when the window is modified.'''
-        canvas_width = event.width
-        self.cards_canvas.itemconfig(self.canvas_frame, width=canvas_width)
+        # ------------------------------------------------------------------------------------------------------
+        # Testing Data
+        # Add cards to the frame
+        # todo use list of cards to iterate through
+        test_card = GiftCard(cards_list_frame, "Subway", 23.74, "lightgrey", "black", 5, anchor='w')
+        test_card.bind("<Button-1>", self.remove_card)
+        test_card.grid(row=0, column=0, sticky='news')
+        test_label = tk.Label(cards_list_frame, text=test_card.get_balance(), anchor='e')
+        test_label.grid(row=0, column=1, sticky='nws')
 
-    def add_card(self, name, balance, event=None, from_db=False):
-        '''Add a new GiftCard to the card list.'''
-        pass
-        # todo finish add card
-        #card = GiftCard(self.cards_list_frame, name, balance, bg, fg, pady)
+        test_card2 = GiftCard(cards_list_frame, "Test Card", 23.74, "lightgrey", "black", 5, anchor='w')
+        test_card2.grid(row=1, column=0, sticky='news')
+        test_card3 = GiftCard(cards_list_frame, "Test Card", 23.74, "lightgrey", "black", 10, anchor='w')
+        test_card3.grid(row=2, column=0, sticky='news')
+        test_card4 = GiftCard(cards_list_frame, "Test Card", 23.74, "lightgrey", "black", 10, anchor='w')
+        test_card4.grid(row=3, column=0, sticky='news')
+        # ------------------------------------------------------------------------------------------------------
 
-    def mouse_scroll(self, event):
-        '''Scrolls the card canvas'''
-        if event.delta:
-            self.cards_canvas.yview_scroll(-1*(event.delta/120), "units")
-        else:
-            if event.num == 5:
-                move = 1
-            else:
-                move = -1
+        # Create canvas window to hold the cards_list_frame.
+        card_list_canvas.create_window((0, 0), window=cards_list_frame, anchor=tk.NW)
 
-            self.cards_canvas.yview_scroll(move, "units")
+        # Needed to make cards_list_bbox info available?
+        cards_list_frame.update_idletasks()
+        # Get bounding box of canvas with the cards list.
+        cards_list_bbox = card_list_canvas.bbox(tk.ALL)
+        # print('canvas.cards_list_bbox(tk.ALL): {}'.format(cards_list_bbox))
+
+        # Set the scrollable region to the width of the cards list canvas bounding box
+        # todo set without using hard numbers
+        w, _ = cards_list_bbox[2], cards_list_bbox[3]
+        card_list_canvas.configure(scrollregion=cards_list_bbox, width=w, height=121)
+
+        buttons_frame = tk.Frame(main_frame, bg="Blue", bd=2, relief=tk.GROOVE)
+        buttons_frame.grid(row=5, column=0, sticky=tk.SE)
+
+        add_card_button = tk.Button(buttons_frame, text="Add Card")
+        add_card_button.grid(row=0, column=0, padx=2, pady=10)
+
+    def remove_card(self, event):
+        print("Removing a card!")
+
+    def add_card(self, event):
+        print("Opening the add card screen!")
+
+    def add_card_dialogue(self):
+        dialogue = AddCardDialogueWindow(self)
+        self.wait_window(dialogue)
 
 
 if __name__ == "__main__":
     gift_card_ledger = GiftCardLedger()
-gift_card_ledger.mainloop()
+    gift_card_ledger.mainloop()
 
 '''
 used to print a list of font families available on the system.
