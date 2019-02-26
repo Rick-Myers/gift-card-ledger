@@ -80,7 +80,7 @@ class GiftCardLedger(tk.Tk):
         buttons_frame = tk.Frame(main_frame, bg="Blue", bd=2, relief=tk.GROOVE)
         buttons_frame.grid(row=5, column=0, sticky=tk.SE)
 
-        add_card_button = tk.Button(buttons_frame, text="Add Card")
+        add_card_button = tk.Button(buttons_frame, text="Add Card", command=self.add_card_dialogue)
         add_card_button.grid(row=0, column=0, padx=2, pady=10)
 
     def remove_card(self, event):
