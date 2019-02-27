@@ -3,7 +3,7 @@ __author__ = "Rick Myers"
 import tkinter as tk
 
 
-class AddCardDialogueWindow(tk.Toplevel):
+class AddCardDialog(tk.Toplevel):
     def __init__(self, parent, title = None):
         tk.Toplevel.__init__(self, parent)
         self.transient(parent)
