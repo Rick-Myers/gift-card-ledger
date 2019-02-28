@@ -7,7 +7,7 @@ from AddCardDialog import AddCardDialog
 
 
 class GiftCardLedger(tk.Tk):
-    # todo adjust frame colors after layout is complete
+    # todo adjust widget bg= colors after layout is complete
     def __init__(self, cards_list=None, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
 
@@ -51,22 +51,11 @@ class GiftCardLedger(tk.Tk):
 
         # Add cards to the frame
         # todo load cards from sql db
-        self.card_list_maker()
+        self.temp_card_list_maker()
         for row_index, card in enumerate(self.cards_list):
             card.bind("<Button-1>", self.remove_card)
             card.grid(row=row_index, sticky='news')
             card.balance_label.grid(row=row_index, column=1, sticky='nws')
-            #balance_label = tk.Label(self.cards_list_frame, text=card.get_balance(), anchor='e')
-            #balance_label.grid(row=row_index, column=1, sticky='nws')
-
-
-        #--------------------
-        temp = self.cards_list_frame.grid_slaves(column=0)
-        print([c.name for c in temp])
-
-        temp2 = self.cards_list_frame.grid_slaves(column=1)
-        print([c.cget("text") for c in temp2])
-        #-----------------------
 
         # Create canvas window to hold the cards_list_frame.
         self.card_list_canvas.create_window((0, 0), window=self.cards_list_frame, anchor=tk.NW)
@@ -75,7 +64,6 @@ class GiftCardLedger(tk.Tk):
         self.cards_list_frame.update_idletasks()
         # Get bounding box of canvas with the cards list.
         cards_list_bbox = self.card_list_canvas.bbox(tk.ALL)
-        #print('canvas.cards_list_bbox(tk.ALL): {}'.format(cards_list_bbox))
 
         # Set the scrollable region to the height of the cards list canvas bounding box
         # Reconfigure the card list canvas to be the same size as the bounding box
@@ -89,7 +77,7 @@ class GiftCardLedger(tk.Tk):
         add_card_button = tk.Button(buttons_frame, text="Add Card", command=self.add_card_dialogue)
         add_card_button.grid(row=0, column=0, padx=2, pady=10)
 
-        #root window binds
+        # root window binds
         self.bind("<Configure>", self.canvas_configure)
 
     def remove_card(self, event=None):
@@ -97,36 +85,21 @@ class GiftCardLedger(tk.Tk):
         # remove from list
         self.cards_list.remove(card)
         # remove from canvas frame
-        print("Destroying widget at row: {}".format(card.grid_info()['row']))
-        # rowx = card.grid_info()['row']
-        # slaves_in_row = self.cards_list_frame.grid_slaves(row=rowx)
-        # for slave in slaves_in_row:
-        #     print(slave)
-        #     slave.destroy()
         card.destroy()
-        #
-        # for c in self.cards_list_frame.grid_slaves(column=1):
-        #     print(c.grid_info()['row'])
-        #     c.destroy()
-
-        # remove from db
-        # configure rows for card labels for grid. configured rows for balance labels in grid.
+        # todo remove from db
+        # update card grid positions.
         self.update_rows()
-        # recolor
-        # temp = self.cards_list_frame.grid_slaves()
-        #         # print([c.name for c in temp])
-        #         # temp[-1].edit_name("Deuce")
+        # todo recolor
 
     def add_card(self, dialog):
-        # the row is the len of the slaves
+        # the row index is the number of widgets within the first column of the frame
         row_index = len(self.cards_list_frame.grid_slaves(column=0))
-        # skaf for c in self.cards_list_frame.grid_slaves(column=0):
-        # skaf    print(c.grid_info()['row'])
-        print("Adding card at row: {}".format(row_index))
         # create gift card
         card = GiftCard(self.cards_list_frame, dialog[0], dialog[1], "lightgrey", "black", 10, anchor='w')
-        # add to grid
+        # bind card actions
         card.bind("<Button-1>", self.remove_card)
+        # add to card and label to grid
+        # todo overload grid() to add balance label when card is added to grid
         card.grid(row=row_index, column=0, sticky='news')
         card.balance_label.grid(row=row_index, column=1, sticky='nws')
         # add to gift card list
@@ -137,7 +110,6 @@ class GiftCardLedger(tk.Tk):
 
     def add_card_dialogue(self):
         # todo check if None before attempting to make a card... the user may have exited early
-
         dialog = AddCardDialog(self)
         self.wait_window(dialog)
         self.add_card(dialog.result)
@@ -148,9 +120,7 @@ class GiftCardLedger(tk.Tk):
             card.grid(row=row_index)
             card.balance_label.grid(row=row_index)
 
-
-
-    def card_list_maker(self):
+    def temp_card_list_maker(self):
         test_card = GiftCard(self.cards_list_frame, "Card A", 11.11, "lightgrey", "black", 5, anchor='w')
         test_card2 = GiftCard(self.cards_list_frame, "Card B", 22.22, "lightgrey", "black", 5, anchor='w')
         test_card3 = GiftCard(self.cards_list_frame, "Card C", 33.33, "lightgrey", "black", 10, anchor='w')
@@ -159,6 +129,7 @@ class GiftCardLedger(tk.Tk):
         self.cards_list.append(test_card2)
         self.cards_list.append(test_card3)
         self.cards_list.append(test_card4)
+
 
 if __name__ == "__main__":
     gift_card_ledger = GiftCardLedger()
@@ -169,4 +140,6 @@ used to print a list of font families available on the system.
 rom tkinter import Tk, font
 root = Tk()
 print(font.families())
+used to print current bounding box of frame
+#print('canvas.cards_list_bbox(tk.ALL): {}'.format(cards_list_bbox))
 '''
