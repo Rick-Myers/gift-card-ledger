@@ -79,5 +79,5 @@ class AddCardDialog(tk.Toplevel):
 
     def apply(self):
         name = str(self.e1.get())
-        balance = 0 #int(self.e2.get())
+        balance = float(self.e2.get())
         self.result = (name, balance)

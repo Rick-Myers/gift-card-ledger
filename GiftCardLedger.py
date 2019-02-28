@@ -55,9 +55,18 @@ class GiftCardLedger(tk.Tk):
         for row_index, card in enumerate(self.cards_list):
             card.bind("<Button-1>", self.remove_card)
             card.grid(row=row_index, sticky='news')
+            card.balance_label.grid(row=row_index, column=1, sticky='nws')
+            #balance_label = tk.Label(self.cards_list_frame, text=card.get_balance(), anchor='e')
+            #balance_label.grid(row=row_index, column=1, sticky='nws')
 
-        temp = self.cards_list_frame.grid_slaves()
+
+        #--------------------
+        temp = self.cards_list_frame.grid_slaves(column=0)
         print([c.name for c in temp])
+
+        temp2 = self.cards_list_frame.grid_slaves(column=1)
+        print([c.cget("text") for c in temp2])
+        #-----------------------
 
         # Create canvas window to hold the cards_list_frame.
         self.card_list_canvas.create_window((0, 0), window=self.cards_list_frame, anchor=tk.NW)
@@ -76,7 +85,7 @@ class GiftCardLedger(tk.Tk):
 
         # Button for adding a new card and the frame it is in.
         buttons_frame = tk.Frame(main_frame, bg="Blue", bd=2, relief=tk.GROOVE)
-        buttons_frame.grid(row=5, column=0, sticky=tk.SE)
+        buttons_frame.grid(row=5, column=0, pady=5, sticky=tk.SE)
         add_card_button = tk.Button(buttons_frame, text="Add Card", command=self.add_card_dialogue)
         add_card_button.grid(row=0, column=0, padx=2, pady=10)
 
@@ -89,14 +98,20 @@ class GiftCardLedger(tk.Tk):
         self.cards_list.remove(card)
         # remove from canvas frame
         print("Destroying widget at row: {}".format(card.grid_info()['row']))
+        # rowx = card.grid_info()['row']
+        # slaves_in_row = self.cards_list_frame.grid_slaves(row=rowx)
+        # for slave in slaves_in_row:
+        #     print(slave)
+        #     slave.destroy()
         card.destroy()
+        #
+        # for c in self.cards_list_frame.grid_slaves(column=1):
+        #     print(c.grid_info()['row'])
+        #     c.destroy()
 
-        for c in self.cards_list_frame.grid_slaves(column=0):
-            print(c.grid_info()['row'])
-        self.update_rows()
         # remove from db
         # configure rows for card labels for grid. configured rows for balance labels in grid.
-
+        self.update_rows()
         # recolor
         # temp = self.cards_list_frame.grid_slaves()
         #         # print([c.name for c in temp])
@@ -104,16 +119,16 @@ class GiftCardLedger(tk.Tk):
 
     def add_card(self, dialog):
         # the row is the len of the slaves
-        row = len(self.cards_list_frame.grid_slaves(column=0))
-        temp = self.cards_list_frame.grid_slaves()
-        for c in self.cards_list_frame.grid_slaves(column=0):
-            print(c.grid_info()['row'])
-        print("Adding card at row: {}".format(row))
+        row_index = len(self.cards_list_frame.grid_slaves(column=0))
+        # skaf for c in self.cards_list_frame.grid_slaves(column=0):
+        # skaf    print(c.grid_info()['row'])
+        print("Adding card at row: {}".format(row_index))
         # create gift card
         card = GiftCard(self.cards_list_frame, dialog[0], dialog[1], "lightgrey", "black", 10, anchor='w')
         # add to grid
         card.bind("<Button-1>", self.remove_card)
-        card.grid(row=row, column=0, sticky='news')
+        card.grid(row=row_index, column=0, sticky='news')
+        card.balance_label.grid(row=row_index, column=1, sticky='nws')
         # add to gift card list
         self.cards_list.append(card)
         
@@ -128,20 +143,18 @@ class GiftCardLedger(tk.Tk):
         self.add_card(dialog.result)
 
     def update_rows(self):
+        # todo only update rows underneath the deleted row
         for row_index, card in enumerate(self.cards_list):
             card.grid(row=row_index)
+            card.balance_label.grid(row=row_index)
 
 
 
     def card_list_maker(self):
-        test_card = GiftCard(self.cards_list_frame, "Card A", 23.74, "lightgrey", "black", 5, anchor='w')
-        # todo balance not being printed in second column
-        #test_card.bind("<Button-1>", self.remove_card)
-        #test_label = tk.Label(self.cards_list_frame, text=test_card.get_balance(), anchor='e')
-        #test_label.grid(row=0, column=1, sticky='nws')
-        test_card2 = GiftCard(self.cards_list_frame, "Card B", 23.74, "lightgrey", "black", 5, anchor='w')
-        test_card3 = GiftCard(self.cards_list_frame, "Card C", 23.74, "lightgrey", "black", 10, anchor='w')
-        test_card4 = GiftCard(self.cards_list_frame, "Card D", 23.74, "lightgrey", "black", 10, anchor='w')
+        test_card = GiftCard(self.cards_list_frame, "Card A", 11.11, "lightgrey", "black", 5, anchor='w')
+        test_card2 = GiftCard(self.cards_list_frame, "Card B", 22.22, "lightgrey", "black", 5, anchor='w')
+        test_card3 = GiftCard(self.cards_list_frame, "Card C", 33.33, "lightgrey", "black", 10, anchor='w')
+        test_card4 = GiftCard(self.cards_list_frame, "Card D", 44.44, "lightgrey", "black", 10, anchor='w')
         self.cards_list.append(test_card)
         self.cards_list.append(test_card2)
         self.cards_list.append(test_card3)

@@ -10,9 +10,14 @@ class GiftCard(tk.Label):
        balance."""
     # todo try using args and kwargs. Is this just a wrapper?
     def __init__(self, master, name, balance, bg, fg, pady, anchor):
+        self.master = master
         self.name = name
         self.balance = balance
+        self.balance_label = self._create_label()
         super().__init__(master, text=name, bg=bg, fg=fg, pady=pady, anchor=anchor)
+
+    def _create_label(self):
+        return tk.Label(self.master, text=self.get_balance(), anchor='e')
 
     def update_balance(self, deduction):
         """Updates the balance by reducing the deduction from the current balance."""
@@ -22,6 +27,10 @@ class GiftCard(tk.Label):
         """Returns the current balance in a money format."""
         formatted_balance = '${:,.2f}'.format(float(self.balance))
         return str(formatted_balance)
+
+    def destroy(self):
+        self.balance_label.destroy()
+        super().destroy()
 
     def edit_name(self, new_name):
         self.name = new_name
