@@ -1,6 +1,7 @@
 __author__ = "Rick Myers"
 
 import tkinter as tk
+import tkinter.messagebox as mbox
 from tkinter import PhotoImage
 from GiftCard import GiftCard
 from AddCardDialog import AddCardDialog
@@ -82,14 +83,15 @@ class GiftCardLedger(tk.Tk):
 
     def remove_card(self, event=None):
         card = event.widget
-        # remove from list
-        self.cards_list.remove(card)
-        # remove from canvas frame
-        card.destroy()
-        # todo remove from db
-        # update card grid positions.
-        self.update_rows()
-        # todo recolor
+        if mbox.askyesno("Are you sure?", "Delete " + card.name + "?"):
+            # remove from list
+            self.cards_list.remove(card)
+            # remove from canvas frame
+            card.destroy()
+            # todo remove from db
+            # update card grid positions.
+            self.update_rows()
+            # todo recolor
 
     def add_card(self, dialog):
         # the row index is the number of widgets within the first column of the frame
