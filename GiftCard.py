@@ -23,4 +23,8 @@ class GiftCard(tk.Label):
         formatted_balance = '${:,.2f}'.format(float(self.balance))
         return str(formatted_balance)
 
+    def edit_name(self, new_name):
+        self.name = new_name
+        self.configure(text=self.name)
+
 

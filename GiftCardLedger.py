@@ -55,7 +55,9 @@ class GiftCardLedger(tk.Tk):
         for row_index, card in enumerate(self.cards_list):
             card.bind("<Button-1>", self.remove_card)
             card.grid(row=row_index, sticky='news')
-            print(card.name)
+
+        temp = self.cards_list_frame.grid_slaves()
+        print([c.name for c in temp])
 
         # Create canvas window to hold the cards_list_frame.
         self.card_list_canvas.create_window((0, 0), window=self.cards_list_frame, anchor=tk.NW)
@@ -81,32 +83,65 @@ class GiftCardLedger(tk.Tk):
         #root window binds
         self.bind("<Configure>", self.canvas_configure)
 
-    def remove_card(self, event):
-        pass
+    def remove_card(self, event=None):
+        card = event.widget
+        # remove from list
+        self.cards_list.remove(card)
+        # remove from canvas frame
+        print("Destroying widget at row: {}".format(card.grid_info()['row']))
+        card.destroy()
 
-    def add_card(self, event):
-        pass
+        for c in self.cards_list_frame.grid_slaves(column=0):
+            print(c.grid_info()['row'])
+        self.update_rows()
+        # remove from db
+        # configure rows for card labels for grid. configured rows for balance labels in grid.
+
+        # recolor
+        # temp = self.cards_list_frame.grid_slaves()
+        #         # print([c.name for c in temp])
+        #         # temp[-1].edit_name("Deuce")
+
+    def add_card(self, dialog):
+        # the row is the len of the slaves
+        row = len(self.cards_list_frame.grid_slaves(column=0))
+        temp = self.cards_list_frame.grid_slaves()
+        for c in self.cards_list_frame.grid_slaves(column=0):
+            print(c.grid_info()['row'])
+        print("Adding card at row: {}".format(row))
+        # create gift card
+        card = GiftCard(self.cards_list_frame, dialog[0], dialog[1], "lightgrey", "black", 10, anchor='w')
+        # add to grid
+        card.bind("<Button-1>", self.remove_card)
+        card.grid(row=row, column=0, sticky='news')
+        # add to gift card list
+        self.cards_list.append(card)
         
     def canvas_configure(self, event=None):
         self.card_list_canvas.configure(scrollregion=self.card_list_canvas.bbox(tk.ALL))
 
     def add_card_dialogue(self):
+        # todo check if None before attempting to make a card... the user may have exited early
+
         dialog = AddCardDialog(self)
         self.wait_window(dialog)
-        print(dialog.result)
-        test_card4 = GiftCard(self.cards_list_frame, dialog.result[0], dialog.result[1], "lightgrey", "black", 10, anchor='w')
-        test_card4.grid(row=5, column=0, sticky='news')
-        self.cards_list.append(test_card4)
+        self.add_card(dialog.result)
+
+    def update_rows(self):
+        for row_index, card in enumerate(self.cards_list):
+            card.grid(row=row_index)
+
+
 
     def card_list_maker(self):
-        test_card = GiftCard(self.cards_list_frame, "Subway", 23.74, "lightgrey", "black", 5, anchor='w')
+        test_card = GiftCard(self.cards_list_frame, "Card A", 23.74, "lightgrey", "black", 5, anchor='w')
         # todo balance not being printed in second column
         #test_card.bind("<Button-1>", self.remove_card)
         #test_label = tk.Label(self.cards_list_frame, text=test_card.get_balance(), anchor='e')
         #test_label.grid(row=0, column=1, sticky='nws')
-        test_card2 = GiftCard(self.cards_list_frame, "Test Card", 23.74, "lightgrey", "black", 5, anchor='w')
-        test_card3 = GiftCard(self.cards_list_frame, "Test Card", 23.74, "lightgrey", "black", 10, anchor='w')
-        test_card4 = GiftCard(self.cards_list_frame, "Test Card", 23.74, "lightgrey", "black", 10, anchor='w')
+        test_card2 = GiftCard(self.cards_list_frame, "Card B", 23.74, "lightgrey", "black", 5, anchor='w')
+        test_card3 = GiftCard(self.cards_list_frame, "Card C", 23.74, "lightgrey", "black", 10, anchor='w')
+        test_card4 = GiftCard(self.cards_list_frame, "Card D", 23.74, "lightgrey", "black", 10, anchor='w')
         self.cards_list.append(test_card)
         self.cards_list.append(test_card2)
         self.cards_list.append(test_card3)
