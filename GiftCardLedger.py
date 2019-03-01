@@ -3,6 +3,8 @@ __author__ = "Rick Myers"
 import tkinter as tk
 import tkinter.messagebox as mbox
 from tkinter import PhotoImage
+import os
+import sqlite3
 from GiftCard import GiftCard
 from AddCardDialog import AddCardDialog
 
@@ -51,12 +53,8 @@ class GiftCardLedger(tk.Tk):
         self.cards_list_frame.columnconfigure(0, {'minsize': 200, 'pad': 10})
 
         # Add cards to the frame
-        # todo load cards from sql db
-        self.temp_card_list_maker()
-        for row_index, card in enumerate(self.cards_list):
-            card.bind("<Button-1>", self.remove_card)
-            card.grid(row=row_index, sticky='news')
-            card.balance_label.grid(row=row_index, column=1, sticky='nws')
+        for card in self.load():
+            self.add_card(card, True)
 
         # Create canvas window to hold the cards_list_frame.
         self.card_list_canvas.create_window((0, 0), window=self.cards_list_frame, anchor=tk.NW)
@@ -80,6 +78,7 @@ class GiftCardLedger(tk.Tk):
 
         # root window binds
         self.bind("<Configure>", self.canvas_configure)
+        # self.card_list_canvas.bind("<Configure>", self.card_width)
 
     def remove_card(self, event=None):
         card = event.widget
@@ -89,15 +88,18 @@ class GiftCardLedger(tk.Tk):
             # remove from canvas frame
             card.destroy()
             # todo remove from db
+            sql_remove_card = "DELETE FROM gift_cards WHERE name=? AND balance=?"
+            card_data = (card.name, card.balance)
+            self.run_query(sql_remove_card, card_data)
             # update card grid positions.
             self.update_rows()
             # todo recolor
 
-    def add_card(self, dialog):
+    def add_card(self, card_data, from_db=False):
         # the row index is the number of widgets within the first column of the frame
         row_index = len(self.cards_list_frame.grid_slaves(column=0))
         # create gift card
-        card = GiftCard(self.cards_list_frame, dialog[0], dialog[1], "lightgrey", "black", 10, anchor='w')
+        card = GiftCard(self.cards_list_frame, card_data[0], card_data[1], "lightgrey", "black", 10, anchor='w')
         # bind card actions
         card.bind("<Button-1>", self.remove_card)
         # add to card and label to grid
@@ -106,9 +108,52 @@ class GiftCardLedger(tk.Tk):
         card.balance_label.grid(row=row_index, column=1, sticky='nws')
         # add to gift card list
         self.cards_list.append(card)
-        
+        if not from_db:
+            self.save(card)
+
+    def card_width(self, event):
+        frame_width = event.width
+        self.card_list_canvas.itemconfig(self.cards_frame, width=frame_width)
+
+    def save(self, card):
+        sql_add_card = "INSERT INTO gift_cards VALUES (?, ?)"
+        card_data = (card.name, card.balance)
+        self.run_query(sql_add_card, card_data)
+
+    def load(self):
+        sql_load_cards = "SELECT * FROM gift_cards"
+        return self.run_query(sql_load_cards, receive=True)
+
+    @staticmethod
+    def run_query(sql, data=None, receive=None):
+        db_conn = sqlite3.connect('gift_cards.db')
+        db_cursor = db_conn.cursor()
+
+        # if data is supplied, it is inserted. If not, only the command is executed
+        if data:
+            db_cursor.execute(sql, data)
+        else:
+            db_cursor.execute(sql)
+        # if is true, return the requested rows. If not, commit to database.
+        if receive:
+            return db_cursor.fetchall()
+        else:
+            db_conn.commit()
+        db_conn.close()
+
+    @staticmethod
+    def initialize_db():
+        sql_create_table = "CREATE TABLE gift_cards (name TEXT, balance REAL)"
+        GiftCardLedger.run_query(sql_create_table)
+
+        sql_insert_card = "INSERT INTO gift_cards VALUES (?, ?)"
+        card = ("Delete Me", 77.77)
+        GiftCardLedger.run_query(sql_insert_card, card)
+
+
     def canvas_configure(self, event=None):
         self.card_list_canvas.configure(scrollregion=self.card_list_canvas.bbox(tk.ALL))
+
 
     def add_card_dialogue(self):
         # todo check if None before attempting to make a card... the user may have exited early
@@ -134,6 +179,8 @@ class GiftCardLedger(tk.Tk):
 
 
 if __name__ == "__main__":
+    if not os.path.isfile('gift_cards.db'):
+        GiftCardLedger.initialize_db()
     gift_card_ledger = GiftCardLedger()
     gift_card_ledger.mainloop()
 

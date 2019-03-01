@@ -116,6 +116,9 @@ dmypy.json
 .pyre/
 
 # Persistence
+gift_cards.db
 cards.dat
+
+# Pycharm
 .idea/
 .idea/workspace.xml
