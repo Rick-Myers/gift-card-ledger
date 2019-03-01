@@ -29,7 +29,7 @@ class GiftCardLedger(tk.Tk):
         main_frame.columnconfigure(0, weight=1)
 
         # Screen label that appears at the top. It displays what screen is currently active.
-        # todo remove and use simple menu
+        # todo remove and use simple menu... maybe... I kinda like it.
         top_label_var = tk.StringVar(main_frame)
         top_label = tk.Label(main_frame, textvar=top_label_var, fg="black", bg="white", font=('Terminal', 20))
         top_label.grid(row=0, column=0, pady=5, sticky=tk.NW)
@@ -78,10 +78,8 @@ class GiftCardLedger(tk.Tk):
         add_card_button = tk.Button(buttons_frame, text="Add Card", command=self.add_card_dialogue)
         add_card_button.grid(row=0, column=0, padx=2, pady=10)
 
-
         # root window binds
-        self.bind("<Configure>", self.canvas_configure)
-        # self.card_list_canvas.bind("<Configure>", self.card_width)
+        self.bind("<Configure>", self.scroll_region_resize)
 
     def remove_card(self, event=None):
         card = event.widget
@@ -90,9 +88,9 @@ class GiftCardLedger(tk.Tk):
             self.cards_list.remove(card)
             # remove from canvas frame
             card.destroy()
-            # todo remove from db
-            sql_remove_card = "DELETE FROM gift_cards WHERE name=? AND balance=?"
-            card_data = (card.name, card.balance)
+            # remove from db
+            sql_remove_card = "DELETE FROM gift_cards WHERE name=? AND balance=? AND number=?"
+            card_data = (card.name, card.balance, card.number)
             self.run_query(sql_remove_card, card_data)
             # update card grid positions.
             self.update_rows()
@@ -102,7 +100,7 @@ class GiftCardLedger(tk.Tk):
         # the row index is the number of widgets within the first column of the frame
         row_index = len(self.cards_list_frame.grid_slaves(column=0))
         # create gift card
-        card = GiftCard(self.cards_list_frame, card_data[0], card_data[1], "lightgrey", "black", 10, anchor='w')
+        card = GiftCard(self.cards_list_frame, card_data[0], card_data[1], card_data[2], "lightgrey", "black", 10, anchor='w')
         # bind card actions
         card.bind("<Button-1>", self.remove_card)
         # add to card and label to grid
@@ -111,16 +109,13 @@ class GiftCardLedger(tk.Tk):
         card.balance_label.grid(row=row_index, column=1, sticky='nws')
         # add to gift card list
         self.cards_list.append(card)
+        # insert into db if card didn't come from db
         if not from_db:
             self.save(card)
 
-    def card_width(self, event):
-        frame_width = event.width
-        self.card_list_canvas.itemconfig(self.cards_frame, width=frame_width)
-
     def save(self, card):
-        sql_add_card = "INSERT INTO gift_cards VALUES (?, ?)"
-        card_data = (card.name, card.balance)
+        sql_add_card = "INSERT INTO gift_cards VALUES (?, ?, ?)"
+        card_data = (card.name, card.balance, card.number)
         self.run_query(sql_add_card, card_data)
 
     def load(self):
@@ -146,23 +141,22 @@ class GiftCardLedger(tk.Tk):
 
     @staticmethod
     def initialize_db():
-        sql_create_table = "CREATE TABLE gift_cards (name TEXT, balance REAL)"
+        sql_create_table = "CREATE TABLE gift_cards (name TEXT, balance REAL, number INTEGER)"
         GiftCardLedger.run_query(sql_create_table)
 
-        sql_insert_card = "INSERT INTO gift_cards VALUES (?, ?)"
-        card = ("Delete Me", 77.77)
+        sql_insert_card = "INSERT INTO gift_cards VALUES (?, ?, ?)"
+        card = ("Delete Me", 77.77, 7777777)
         GiftCardLedger.run_query(sql_insert_card, card)
 
-
-    def canvas_configure(self, event=None):
+    def scroll_region_resize(self, event=None):
         self.card_list_canvas.configure(scrollregion=self.card_list_canvas.bbox(tk.ALL))
-
 
     def add_card_dialogue(self):
         # todo check if None before attempting to make a card... the user may have exited early
         dialog = AddCardDialog(self)
         self.wait_window(dialog)
-        self.add_card(dialog.result)
+        if dialog.result:
+            self.add_card(dialog.result)
 
     def update_rows(self):
         # todo only update rows underneath the deleted row

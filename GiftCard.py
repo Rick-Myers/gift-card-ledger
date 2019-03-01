@@ -9,11 +9,12 @@ class GiftCard(tk.Label):
        if supplied with an amount of money to deduct from its current
        balance."""
     # todo try using args and kwargs. Is this just a wrapper?
-    def __init__(self, master, name, balance, bg, fg, pady, anchor):
+    def __init__(self, master, name, balance, number, bg, fg, pady, anchor):
         self.master = master
         self.name = name
         self.balance = balance
         self.balance_label = self._create_label()
+        self.number = number
         super().__init__(master, text=name, bg=bg, fg=fg, pady=pady, anchor=anchor)
 
     def _create_label(self):
