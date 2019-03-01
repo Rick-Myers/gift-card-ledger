@@ -68,6 +68,8 @@ class GiftCardLedger(tk.Tk):
         # Reconfigure the card list canvas to be the same size as the bounding box
         # todo set without using hard numbers, height is currently manually set
         w, _ = cards_list_bbox[2], cards_list_bbox[3]
+        if w <= 243:
+            w = 243
         self.card_list_canvas.configure(scrollregion=cards_list_bbox, width=w, height=120)
 
         # Button for adding a new card and the frame it is in.
@@ -75,6 +77,7 @@ class GiftCardLedger(tk.Tk):
         buttons_frame.grid(row=5, column=0, pady=5, sticky=tk.SE)
         add_card_button = tk.Button(buttons_frame, text="Add Card", command=self.add_card_dialogue)
         add_card_button.grid(row=0, column=0, padx=2, pady=10)
+
 
         # root window binds
         self.bind("<Configure>", self.canvas_configure)
