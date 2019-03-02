@@ -8,12 +8,15 @@ import sqlite3
 from GiftCard import GiftCard
 from AddCardDialog import AddCardDialog
 from EditCardDialog import EditCardDialog
+from datetime import date
 
 
 class GiftCardLedger(tk.Tk):
     # todo adjust widget bg= colors after layout is complete
     def __init__(self, cards_list=None, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
+
+        #self.date = datetime.now()
 
         if not cards_list:
             self.cards_list = []
@@ -82,9 +85,15 @@ class GiftCardLedger(tk.Tk):
         # root window binds
         self.bind("<Configure>", self.scroll_region_resize)
 
+        # use this to display edit card dialog and return data, currently returns only a float for balance
+        test = self.run_query("SELECT * FROM gift_cards", receive=True)
+        print(test)
         card = self.cards_list[0]
         dialog = EditCardDialog(self, card)
         self.wait_window(dialog)
+        print(dialog.result)
+
+
 
     def remove_card(self, event=None):
         card = event.widget
@@ -120,12 +129,13 @@ class GiftCardLedger(tk.Tk):
             self.save(card)
 
     def save(self, card):
-        sql_add_card = "INSERT INTO gift_cards VALUES (?, ?, ?)"
-        card_data = (card.name, card.balance, card.number)
+        sql_add_card = "INSERT INTO gift_cards VALUES (?, ?, ?, ?)"
+
+        card_data = (card.name, card.balance, card.number, date.today())
         self.run_query(sql_add_card, card_data)
 
     def load(self):
-        sql_load_cards = "SELECT * FROM gift_cards"
+        sql_load_cards = "SELECT name, balance, number FROM gift_cards"
         return self.run_query(sql_load_cards, receive=True)
 
     @staticmethod
@@ -147,11 +157,11 @@ class GiftCardLedger(tk.Tk):
 
     @staticmethod
     def initialize_db():
-        sql_create_table = "CREATE TABLE gift_cards (name TEXT, balance REAL, number INTEGER)"
+        sql_create_table = "CREATE TABLE gift_cards (name TEXT, balance REAL, number INTEGER, history DATE)"
         GiftCardLedger.run_query(sql_create_table)
 
-        sql_insert_card = "INSERT INTO gift_cards VALUES (?, ?, ?)"
-        card = ("Delete Me", 77.77, 7777777)
+        sql_insert_card = "INSERT INTO gift_cards VALUES (?, ?, ?, ?)"
+        card = ("Delete Me", 77.77, 7777777, date.today())  # todo add initial date and value
         GiftCardLedger.run_query(sql_insert_card, card)
 
     def scroll_region_resize(self, event=None):
@@ -198,4 +208,10 @@ root = Tk()
 print(font.families())
 used to print current bounding box of frame
 #print('canvas.cards_list_bbox(tk.ALL): {}'.format(cards_list_bbox))
+used to print column names of specific table
+ connection = sqlite3.connect('gift_cards.db')
+        cursor = connection.cursor()
+        cursor.execute("PRAGMA table_info(gift_cards)")
+        print(cursor.fetchall())
+        connection.close()
 '''
