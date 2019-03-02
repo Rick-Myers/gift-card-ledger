@@ -7,6 +7,7 @@ import os
 import sqlite3
 from GiftCard import GiftCard
 from AddCardDialog import AddCardDialog
+from EditCardDialog import EditCardDialog
 
 
 class GiftCardLedger(tk.Tk):
@@ -81,6 +82,10 @@ class GiftCardLedger(tk.Tk):
         # root window binds
         self.bind("<Configure>", self.scroll_region_resize)
 
+        card = self.cards_list[0]
+        dialog = EditCardDialog(self, card)
+        self.wait_window(dialog)
+
     def remove_card(self, event=None):
         card = event.widget
         if mbox.askyesno("Are you sure?", "Delete " + card.name + "?"):
@@ -94,7 +99,7 @@ class GiftCardLedger(tk.Tk):
             self.run_query(sql_remove_card, card_data)
             # update card grid positions.
             self.update_rows()
-            # todo recolor
+            # todo recolor so rows alternate colors
 
     def add_card(self, card_data, from_db=False):
         # the row index is the number of widgets within the first column of the frame
@@ -105,6 +110,7 @@ class GiftCardLedger(tk.Tk):
         card.bind("<Button-1>", self.remove_card)
         # add to card and label to grid
         # todo overload grid() to add balance label when card is added to grid
+        # todo recolor so rows alternate colors
         card.grid(row=row_index, column=0, sticky='news')
         card.balance_label.grid(row=row_index, column=1, sticky='nws')
         # add to gift card list
@@ -152,11 +158,15 @@ class GiftCardLedger(tk.Tk):
         self.card_list_canvas.configure(scrollregion=self.card_list_canvas.bbox(tk.ALL))
 
     def add_card_dialogue(self):
-        # todo check if None before attempting to make a card... the user may have exited early
         dialog = AddCardDialog(self)
         self.wait_window(dialog)
         if dialog.result:
             self.add_card(dialog.result)
+
+    def edit_card_dialog(self, card):
+        dialog = EditCardDialog(self, card)
+        self.wait_window(dialog)
+
 
     def update_rows(self):
         # todo only update rows underneath the deleted row

@@ -2,6 +2,8 @@ __author__ = "Rick Myers"
 
 import tkinter as tk
 
+# todo start using date to record history.
+
 
 class GiftCard(tk.Label):
     """A gift card. For now it only stores the name of the card
@@ -13,12 +15,13 @@ class GiftCard(tk.Label):
         self.master = master
         self.name = name
         self.balance = balance
+        self.starting_balance = balance
         self.balance_label = self._create_label()
         self.number = number
         super().__init__(master, text=name, bg=bg, fg=fg, pady=pady, anchor=anchor)
 
     def _create_label(self):
-        return tk.Label(self.master, text=self.get_balance(), anchor='e')
+        return tk.Label(self.master, text=self.get_balance(self.balance), anchor='e')
 
     def update_balance(self, deduction):
         """Updates the balance by reducing the deduction from the current balance."""
@@ -27,6 +30,11 @@ class GiftCard(tk.Label):
     def get_balance(self):
         """Returns the current balance in a money format."""
         formatted_balance = '${:,.2f}'.format(float(self.balance))
+        return str(formatted_balance)
+
+    def get_balance(self, balance):
+        """Returns the current balance in a money format."""
+        formatted_balance = '${:,.2f}'.format(float(balance))
         return str(formatted_balance)
 
     def destroy(self):
