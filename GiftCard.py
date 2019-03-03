@@ -10,29 +10,32 @@ class GiftCard(tk.Label):
        and the balance. It provides a function to update the balance
        if supplied with an amount of money to deduct from its current
        balance."""
-    # todo try using args and kwargs. Is this just a wrapper?
-    def __init__(self, master, name, balance, number, bg, fg, pady, anchor):
+    # todo start here and change parameters to (name, balance, number) -> then the restg
+    def __init__(self, master, name, balance, number, history, starting_balance):
         self.master = master
         self.name = name
         self.balance = balance
-        self.starting_balance = balance
+        self.starting_balance = starting_balance
         self.balance_label = self._create_label()
         self.number = number
-        super().__init__(master, text=name, bg=bg, fg=fg, pady=pady, anchor=anchor)
+        self.history = history
+        super().__init__(master, text=name, bg="lightgrey", fg="black", pady=10, anchor=tk.W)
 
     def _create_label(self):
-        return tk.Label(self.master, text=self.get_balance(self.balance), anchor='e')
+        return tk.Label(self.master, text=self.formatted_balance(), anchor='e')
 
-    def update_balance(self, deduction):
-        """Updates the balance by reducing the deduction from the current balance."""
-        self.balance = float(self.balance) - deduction
+    def update_balance(self, new_balance):
+        """Updates the balance by given balance and updated associated balance label."""
+        self.balance = new_balance
+        self.balance_label.configure(text=self.formatted_balance())
 
-    def get_balance(self):
+    def formatted_balance(self):
         """Returns the current balance in a money format."""
         formatted_balance = '${:,.2f}'.format(float(self.balance))
         return str(formatted_balance)
 
-    def get_balance(self, balance):
+    @staticmethod
+    def format_balance(balance):
         """Returns the current balance in a money format."""
         formatted_balance = '${:,.2f}'.format(float(balance))
         return str(formatted_balance)
@@ -45,4 +48,6 @@ class GiftCard(tk.Label):
         self.name = new_name
         self.configure(text=self.name)
 
-
+    def update_the_balance(self, new_balance):
+        self.balance = new_balance
+        self.balance_label.configure(text=self.balance)

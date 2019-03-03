@@ -2,7 +2,6 @@ __author__ = "Rick Myers"
 
 import tkinter as tk
 import tkinter.messagebox as mbox
-from tkinter import PhotoImage
 import os
 import sqlite3
 from GiftCard import GiftCard
@@ -15,8 +14,6 @@ class GiftCardLedger(tk.Tk):
     # todo adjust widget bg= colors after layout is complete
     def __init__(self, cards_list=None, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
-
-        #self.date = datetime.now()
 
         if not cards_list:
             self.cards_list = []
@@ -88,12 +85,6 @@ class GiftCardLedger(tk.Tk):
         # use this to display edit card dialog and return data, currently returns only a float for balance
         test = self.run_query("SELECT * FROM gift_cards", receive=True)
         print(test)
-        card = self.cards_list[0]
-        dialog = EditCardDialog(self, card)
-        self.wait_window(dialog)
-        print(dialog.result)
-
-
 
     def remove_card(self, event=None):
         card = event.widget
@@ -103,8 +94,8 @@ class GiftCardLedger(tk.Tk):
             # remove from canvas frame
             card.destroy()
             # remove from db
-            sql_remove_card = "DELETE FROM gift_cards WHERE name=? AND balance=? AND number=?"
-            card_data = (card.name, card.balance, card.number)
+            sql_remove_card = "DELETE FROM gift_cards WHERE name=? AND number=?"
+            card_data = (card.name, card.number)
             self.run_query(sql_remove_card, card_data)
             # update card grid positions.
             self.update_rows()
@@ -113,10 +104,29 @@ class GiftCardLedger(tk.Tk):
     def add_card(self, card_data, from_db=False):
         # the row index is the number of widgets within the first column of the frame
         row_index = len(self.cards_list_frame.grid_slaves(column=0))
+        name = card_data[0]
+        balance = card_data[1]
+        number = card_data[2]
+        print(card_data)
+        if from_db:
+            history = card_data[3]
+            starting_balance = card_data[4]
+        else:
+            starting_balance = balance
+            history = str(date.today()) + " -> {}{}".format(GiftCard.format_balance(starting_balance), "\n")
+
         # create gift card
-        card = GiftCard(self.cards_list_frame, card_data[0], card_data[1], card_data[2], "lightgrey", "black", 10, anchor='w')
+        print(history)
+        card = GiftCard(self.cards_list_frame,
+                        name,
+                        balance,
+                        number,
+                        history,
+                        starting_balance
+                        )
         # bind card actions
         card.bind("<Button-1>", self.remove_card)
+        card.bind("<Button-3>", self.edit_card_dialog)
         # add to card and label to grid
         # todo overload grid() to add balance label when card is added to grid
         # todo recolor so rows alternate colors
@@ -129,13 +139,13 @@ class GiftCardLedger(tk.Tk):
             self.save(card)
 
     def save(self, card):
-        sql_add_card = "INSERT INTO gift_cards VALUES (?, ?, ?, ?)"
+        sql_add_card = "INSERT INTO gift_cards VALUES (?, ?, ?, ?, ?)"
 
-        card_data = (card.name, card.balance, card.number, date.today())
+        card_data = (card.name, card.balance, card.number, card.history, card.starting_balance)
         self.run_query(sql_add_card, card_data)
 
     def load(self):
-        sql_load_cards = "SELECT name, balance, number FROM gift_cards"
+        sql_load_cards = "SELECT name, balance, number, history, starting_balance FROM gift_cards"
         return self.run_query(sql_load_cards, receive=True)
 
     @staticmethod
@@ -157,11 +167,18 @@ class GiftCardLedger(tk.Tk):
 
     @staticmethod
     def initialize_db():
-        sql_create_table = "CREATE TABLE gift_cards (name TEXT, balance REAL, number INTEGER, history DATE)"
+        sql_create_table = """
+            CREATE TABLE gift_cards (name TEXT,
+                                    balance REAL,
+                                    number INTEGER,
+                                    history DATE, 
+                                    starting_balance REAL
+                                    )"""
         GiftCardLedger.run_query(sql_create_table)
 
-        sql_insert_card = "INSERT INTO gift_cards VALUES (?, ?, ?, ?)"
-        card = ("Delete Me", 77.77, 7777777, date.today())  # todo add initial date and value
+        sql_insert_card = "INSERT INTO gift_cards VALUES (?, ?, ?, ?, ?)"
+        initial_date = str(date.today()) + " -> {}".format("$77.77\n")
+        card = ("Delete Me", 77.77, 7777777, initial_date, 77.77)
         GiftCardLedger.run_query(sql_insert_card, card)
 
     def scroll_region_resize(self, event=None):
@@ -173,26 +190,29 @@ class GiftCardLedger(tk.Tk):
         if dialog.result:
             self.add_card(dialog.result)
 
-    def edit_card_dialog(self, card):
+    def edit_card_dialog(self, event):
+        card = event.widget
         dialog = EditCardDialog(self, card)
         self.wait_window(dialog)
+        if dialog.result:
+            self._update_card_db(card, dialog.result[0], dialog.result[1])
 
+    def _update_card_db(self, card, new_balance, new_history):
+        card.update_balance(new_balance)
+        print(new_balance)
+        card.history = new_history
+        print(card.history)
+        print(card.number)
+        sql_update_balance = "UPDATE gift_cards SET balance = ?, history = ? WHERE name = ? AND number = ?"
+        data = (new_balance, new_history, card.name, card.number)
+        self.run_query(sql_update_balance, data)
+        print(self.run_query("SELECT * FROM gift_cards", receive=True))
 
     def update_rows(self):
         # todo only update rows underneath the deleted row
         for row_index, card in enumerate(self.cards_list):
             card.grid(row=row_index)
             card.balance_label.grid(row=row_index)
-
-    def temp_card_list_maker(self):
-        test_card = GiftCard(self.cards_list_frame, "Card A", 11.11, "lightgrey", "black", 5, anchor='w')
-        test_card2 = GiftCard(self.cards_list_frame, "Card B", 22.22, "lightgrey", "black", 5, anchor='w')
-        test_card3 = GiftCard(self.cards_list_frame, "Card C", 33.33, "lightgrey", "black", 10, anchor='w')
-        test_card4 = GiftCard(self.cards_list_frame, "Card D", 44.44, "lightgrey", "black", 10, anchor='w')
-        self.cards_list.append(test_card)
-        self.cards_list.append(test_card2)
-        self.cards_list.append(test_card3)
-        self.cards_list.append(test_card4)
 
 
 if __name__ == "__main__":

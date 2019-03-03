@@ -3,7 +3,9 @@ __author__ = "Rick Myers"
 import tkinter as tk
 import tkinter.scrolledtext as tkscrolled
 import sqlite3
+from GiftCard import GiftCard
 from datetime import date
+import copy
 
 class EditCardDialog(tk.Toplevel):
     def __init__(self, parent, card, title=None):
@@ -16,9 +18,10 @@ class EditCardDialog(tk.Toplevel):
         self.parent = parent
         self.card = card
         self.result = None
+        self.new_balance = copy.deepcopy(self.card.balance)
+        self.new_history = copy.deepcopy(self.card.history)
 
         main_frame = tk.Frame(self)
-
 
         # Top frame for label and card name
         label_frame = tk.Frame(self)
@@ -43,22 +46,21 @@ class EditCardDialog(tk.Toplevel):
         self.balance_entry.bind("<Return>", self._update_balance)
         self.balance_entry.grid(row=0, column=2, sticky=tk.NE)
         tk.Label(balance_frame, text="Starting Balance: ", anchor=tk.W).grid(row=1, sticky=tk.NW)
-        self.balance_label = tk.Label(balance_frame, text=self.card.get_balance(self.card.balance),
+        self.balance_label = tk.Label(balance_frame, text=self.card.formatted_balance(),
                                       anchor=tk.W)
         self.balance_label.grid(row=0, column=1, sticky=tk.N)
-        tk.Label(balance_frame, text=self.card.get_balance(self.card.starting_balance),
+        tk.Label(balance_frame, text=GiftCard.format_balance(self.card.starting_balance),
                  anchor=tk.W).grid(row=1, column=1, sticky=tk.N)
 
         # Bottom frame to hold card history
         history_frame = tk.Frame(self)
         history_frame.grid(sticky=tk.NSEW)
 
-        m = "11/11/1982 23.20\ndate 20.10\ndate 15.05\ndate 23.20\ndate 20.10\ndate 15.05\ndate 23.20\ndate 20.10\ndate 15.05\ndate 23.20\ndate 20.10\ndate 15.05"
-        history_txt = tkscrolled.ScrolledText(history_frame, width=20, height=10)
-        history_txt.insert(1.0, m)
-        history_txt.config(state=tk.DISABLED)
+        self.history_txt = tkscrolled.ScrolledText(history_frame, width=24, height=10)
+        self.history_txt.insert(1.0, self.card.history)
+        self.history_txt.config(state=tk.DISABLED)
 
-        history_txt.grid(sticky=tk.NSEW)
+        self.history_txt.grid(sticky=tk.NSEW)
 
         # Main frame setup
         main_frame.grid(sticky=tk.NSEW)
@@ -83,41 +85,18 @@ class EditCardDialog(tk.Toplevel):
         #
         # construction hooks
 
-    def body(self, master):
-        return self.balance_entry
-
-    # todo currently the method will perform the subtraction but the printed result isn't pretty.
-    # todo also these changes are not
     def _update_balance(self, event=None):
-        self.card.balance -= float(self.balance_entry.get())
-        self.balance_label.configure(text=str(self.card.balance))
-        print(self.card.balance)
+        self.new_balance -= float(self.balance_entry.get())
+        f_balance = GiftCard.format_balance(self.new_balance)
+        self.balance_label.configure(text=f_balance)
         self.balance_entry.delete(0, tk.END)
-
-        # this works and will update the card. use it to insert real data
-        sql_update_balance = "UPDATE gift_cards SET balance = ? WHERE name = ?"
-        data = (50.00, "Delete Me")
-        self.run_query(sql_update_balance, data)
-
-
-
-
-    @staticmethod
-    def run_query(sql, data=None, receive=None):
-        db_conn = sqlite3.connect('gift_cards.db')
-        db_cursor = db_conn.cursor()
-
-        # if data is supplied, it is inserted. If not, only the command is executed
-        if data:
-            db_cursor.execute(sql, data)
-        else:
-            db_cursor.execute(sql)
-        # if is true, return the requested rows. If not, commit to database.
-        if receive:
-            return db_cursor.fetchall()
-        else:
-            db_conn.commit()
-        db_conn.close()
+        new_history = str(date.today()) + " -> {}".format(f_balance + "\n")
+        self.new_history += new_history
+        print(self.new_history)
+        self.history_txt.config(state=tk.NORMAL)
+        self.history_txt.delete(1.0, tk.END)
+        self.history_txt.insert(1.0, self.new_history)
+        self.history_txt.config(state=tk.DISABLED)
 
     def buttonbox(self):
         box = tk.Frame(self)
@@ -127,7 +106,6 @@ class EditCardDialog(tk.Toplevel):
         w = tk.Button(box, text="Cancel", width=10, command=self.cancel)
         w.grid(row=0, column=1, padx=5, pady=5)
 
-        #self.bind("<Return>", self.ok)
         self.bind("<Escape>", self.cancel)
 
         box.grid()
@@ -152,5 +130,8 @@ class EditCardDialog(tk.Toplevel):
         return 1  # override
 
     def apply(self):
-        self.result = self.card.get_balance(self.card.balance)
+        self.result = (self.new_balance, self.new_history)
         return self.result
+
+
+# test data m = "11/11/1982 23.20\ndate 20.10\ndate 15.05\ndate 23.20\ndate 20.10\ndate 15.05\ndate 23.20\ndate 20.10\ndate 15.05\ndate 23.20\ndate 20.10\ndate 15.05"
