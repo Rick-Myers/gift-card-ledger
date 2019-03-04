@@ -11,28 +11,25 @@ from datetime import date
 
 
 class GiftCardLedger(tk.Tk):
-    # todo adjust widget bg= colors after layout is complete
-    def __init__(self, cards_list=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
-
-        if not cards_list:
-            self.cards_list = []
-        else:
-            self.cards_list = cards_list
 
         self.title("Gift Card Ledger")
         self.configure(background="Gray")
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
+        self.cards_list = []
+        self.color_schemes = [{"bg": "lightgrey", "fg": "black"}, {"bg": "grey", "fg": "white"}]
 
+        # Create main window frame
         main_frame = tk.Frame(self, bg="Light Blue", bd=3, relief=tk.RIDGE)
         main_frame.grid(sticky=tk.NSEW)
         main_frame.columnconfigure(0, weight=1)
 
-        # Screen label that appears at the top. It displays what screen is currently active.
+        # Create label that appears at the top. It displays what screen is currently active.
         # todo remove and use simple menu... maybe... I kinda like it.
         top_label_var = tk.StringVar(main_frame)
-        top_label = tk.Label(main_frame, textvar=top_label_var, fg="black", bg="white", font=('Terminal', 20))
+        top_label = tk.Label(main_frame, textvar=top_label_var, fg="black", bg="Light Blue", font=('Terminal', 20))
         top_label.grid(row=0, column=0, pady=5, sticky=tk.NW)
         top_label_var.set("Gift Card Ledger")
 
@@ -41,7 +38,7 @@ class GiftCardLedger(tk.Tk):
         canvas_frame.grid(row=2, column=0, sticky=tk.NW)
 
         # Add a canvas into the canvas frame.
-        self.card_list_canvas = tk.Canvas(canvas_frame, bg="Yellow")
+        self.card_list_canvas = tk.Canvas(canvas_frame)
         self.card_list_canvas.grid(row=0, column=0)
 
         # Create a vertical scrollbar linked to the canvas.
@@ -50,14 +47,14 @@ class GiftCardLedger(tk.Tk):
         self.card_list_canvas.configure(yscrollcommand=scrollbar.set)
 
         # Create a frame on the canvas to contain the list of cards.
-        self.cards_list_frame = tk.Frame(self.card_list_canvas, bg="Red", bd=2)
+        self.cards_list_frame = tk.Frame(self.card_list_canvas, bd=2)
         self.cards_list_frame.columnconfigure(0, {'minsize': 200, 'pad': 10})
 
-        # Add cards to the frame
+        # Add cards to the frame from database
         for card in self.load():
             self.add_card(card, True)
 
-        # Create canvas window to hold the cards_list_frame.
+        # Create canvas window after cards have been added.
         self.card_list_canvas.create_window((0, 0), window=self.cards_list_frame, anchor=tk.NW)
 
         # Redraws widgets within frame and creates bounding box access.
@@ -74,17 +71,13 @@ class GiftCardLedger(tk.Tk):
         self.card_list_canvas.configure(scrollregion=cards_list_bbox, width=w, height=120)
 
         # Button for adding a new card and the frame it is in.
-        buttons_frame = tk.Frame(main_frame, bg="Blue", bd=2, relief=tk.GROOVE)
+        buttons_frame = tk.Frame(main_frame, bd=2, relief=tk.GROOVE)
         buttons_frame.grid(row=5, column=0, pady=5, sticky=tk.SE)
-        add_card_button = tk.Button(buttons_frame, text="Add Card", command=self.add_card_dialogue)
-        add_card_button.grid(row=0, column=0, padx=2, pady=10)
+        add_card_button = tk.Button(buttons_frame, text="Add Card", command=self.add_card_dialog)
+        add_card_button.grid(row=0, column=0)
 
         # root window binds
         self.bind("<Configure>", self.scroll_region_resize)
-
-        # use this to display edit card dialog and return data, currently returns only a float for balance
-        test = self.run_query("SELECT * FROM gift_cards", receive=True)
-        print(test)
 
     def remove_card(self, event=None):
         card = event.widget
@@ -97,9 +90,9 @@ class GiftCardLedger(tk.Tk):
             sql_remove_card = "DELETE FROM gift_cards WHERE name=? AND number=?"
             card_data = (card.name, card.number)
             self.run_query(sql_remove_card, card_data)
-            # update card grid positions.
+            # update card grid positions and colors
             self.update_rows()
-            # todo recolor so rows alternate colors
+            self.recolor_cards()
 
     def add_card(self, card_data, from_db=False):
         # the row index is the number of widgets within the first column of the frame
@@ -107,16 +100,14 @@ class GiftCardLedger(tk.Tk):
         name = card_data[0]
         balance = card_data[1]
         number = card_data[2]
-        print(card_data)
+        # if the cards re from the db, we load their data. If not, we have to create a history and starting balance.
         if from_db:
             history = card_data[3]
             starting_balance = card_data[4]
         else:
             starting_balance = balance
             history = str(date.today()) + " -> {}{}".format(GiftCard.format_balance(starting_balance), "\n")
-
         # create gift card
-        print(history)
         card = GiftCard(self.cards_list_frame,
                         name,
                         balance,
@@ -127,9 +118,9 @@ class GiftCardLedger(tk.Tk):
         # bind card actions
         card.bind("<Button-1>", self.remove_card)
         card.bind("<Button-3>", self.edit_card_dialog)
-        # add to card and label to grid
+        # add card and label to grid
         # todo overload grid() to add balance label when card is added to grid
-        # todo recolor so rows alternate colors
+        self.set_card_color(len(self.cards_list), card)
         card.grid(row=row_index, column=0, sticky='news')
         card.balance_label.grid(row=row_index, column=1, sticky='nws')
         # add to gift card list
@@ -140,7 +131,6 @@ class GiftCardLedger(tk.Tk):
 
     def save(self, card):
         sql_add_card = "INSERT INTO gift_cards VALUES (?, ?, ?, ?, ?)"
-
         card_data = (card.name, card.balance, card.number, card.history, card.starting_balance)
         self.run_query(sql_add_card, card_data)
 
@@ -184,9 +174,11 @@ class GiftCardLedger(tk.Tk):
     def scroll_region_resize(self, event=None):
         self.card_list_canvas.configure(scrollregion=self.card_list_canvas.bbox(tk.ALL))
 
-    def add_card_dialogue(self):
+    def add_card_dialog(self):
         dialog = AddCardDialog(self)
+        # start new window and wait for it to return before allowing user to edit previous window
         self.wait_window(dialog)
+        # if the user actually added a new card, save the card.
         if dialog.result:
             self.add_card(dialog.result)
 
@@ -198,21 +190,34 @@ class GiftCardLedger(tk.Tk):
             self._update_card_db(card, dialog.result[0], dialog.result[1])
 
     def _update_card_db(self, card, new_balance, new_history):
+        # update the cards balance and history view, then changes to db.
         card.update_balance(new_balance)
-        print(new_balance)
         card.history = new_history
-        print(card.history)
-        print(card.number)
+
         sql_update_balance = "UPDATE gift_cards SET balance = ?, history = ? WHERE name = ? AND number = ?"
         data = (new_balance, new_history, card.name, card.number)
+
         self.run_query(sql_update_balance, data)
-        print(self.run_query("SELECT * FROM gift_cards", receive=True))
 
     def update_rows(self):
         # todo only update rows underneath the deleted row
         for row_index, card in enumerate(self.cards_list):
             card.grid(row=row_index)
             card.balance_label.grid(row=row_index)
+
+    def recolor_cards(self):
+        for index, card in enumerate(self.cards_list):
+            self.set_card_color(index, card)
+
+    def set_card_color(self, index, card):
+        _, card_style_choice = divmod(index, 2)
+
+        my_scheme_choice = self.color_schemes[card_style_choice]
+
+        card.configure(bg=my_scheme_choice["bg"])
+        card.configure(fg=my_scheme_choice["fg"])
+        card.balance_label.configure(bg=my_scheme_choice["bg"])
+        card.balance_label.configure(fg=my_scheme_choice["fg"])
 
 
 if __name__ == "__main__":
