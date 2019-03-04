@@ -101,7 +101,7 @@ class EditCardDialog(tk.Toplevel):
     def buttonbox(self):
         box = tk.Frame(self)
 
-        w = tk.Button(box, text="OK", width=10, command=self.ok, default=tk.ACTIVE)
+        w = tk.Button(box, text="Save", width=10, command=self.ok, default=tk.ACTIVE)
         w.grid(padx=5, pady=5)
         w = tk.Button(box, text="Cancel", width=10, command=self.cancel)
         w.grid(row=0, column=1, padx=5, pady=5)
@@ -132,6 +132,3 @@ class EditCardDialog(tk.Toplevel):
     def apply(self):
         self.result = (self.new_balance, self.new_history)
         return self.result
-
-
-# test data m = "11/11/1982 23.20\ndate 20.10\ndate 15.05\ndate 23.20\ndate 20.10\ndate 15.05\ndate 23.20\ndate 20.10\ndate 15.05\ndate 23.20\ndate 20.10\ndate 15.05"

@@ -2,16 +2,21 @@ __author__ = "Rick Myers"
 
 import tkinter as tk
 
-# todo start using date to record history.
-
 
 class GiftCard(tk.Label):
-    """A gift card. For now it only stores the name of the card
-       and the balance. It provides a function to update the balance
-       if supplied with an amount of money to deduct from its current
-       balance."""
-    # todo start here and change parameters to (name, balance, number) -> then the restg
+    """The gift card is a label. It keeps track of gift card related data such as
+    the starting balance. It also keeps track of two tkinter labels. The balance
+     label is used to display the gift cards balance in a separate column.
+    """
     def __init__(self, master, name, balance, number, history, starting_balance):
+        """
+        parameter: master (TK) - the window that called this window
+        parameter: name (str) - gift card company name
+        parameter: balance (float) - gift card current balance
+        parameter: number (int) - the number used to identify the card with the company that it belongs too
+        parameter: history (str) - history of all transactions
+        parameter: starting_balance (float) 
+        """
         self.master = master
         self.name = name
         self.balance = balance
@@ -22,21 +27,31 @@ class GiftCard(tk.Label):
         super().__init__(master, text=name, bg="lightgrey", fg="black", pady=10, anchor=tk.W)
 
     def _create_label(self):
+
         return tk.Label(self.master, text=self.formatted_balance(), anchor='e')
 
     def update_balance(self, new_balance):
-        """Updates the balance by given balance and updated associated balance label."""
+        """Updates the balance by given balance and updated associated balance label.
+        This will update the cards balance (and its associated label) and the balance
+        label.
+        parameter: new_balance (float)"""
         self.balance = new_balance
         self.balance_label.configure(text=self.formatted_balance())
 
     def formatted_balance(self):
-        """Returns the current balance in a money format."""
+        """Returns the current balance in a string that is formatted for printing as currency.
+        return: string
+        example: if self.balance == 3.0 then format_balance() == $3.00"""
         formatted_balance = '${:,.2f}'.format(float(self.balance))
         return str(formatted_balance)
 
     @staticmethod
     def format_balance(balance):
-        """Returns the current balance in a money format."""
+        """This function will convert a given float/integer into a string that is
+        formatted for printing as currency.
+        parameter: balance (float)
+        return: string
+        example: format_balance(3.0) == $3.00"""
         formatted_balance = '${:,.2f}'.format(float(balance))
         return str(formatted_balance)
 
