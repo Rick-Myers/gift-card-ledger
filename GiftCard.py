@@ -9,7 +9,9 @@ class GiftCard(tk.Label):
 
     The gift card is a label. It keeps track of gift card related data such as
     the starting balance. It also keeps track of two tkinter labels. The balance
-    label is used to display the gift cards balance in a separate column.
+    label is used to display the gift cards balance in a separate column. The gift
+    cards label is used to display the name of the gift card and is used as an
+    event listener.
 
     """
 
@@ -39,7 +41,7 @@ class GiftCard(tk.Label):
         """
         Updates the card's balance and label to be equal to the given balance.
 
-        :param new_balance: float representing the new balance to be set.
+        :param new_balance: (float) representing the new balance to be set.
         """
         self.balance = new_balance
         self.balance_label.configure(text=self.formatted_balance())
@@ -70,7 +72,7 @@ class GiftCard(tk.Label):
         """
         This will update the current balance of the card and its corresponding label.
 
-        :param new_balance: float representing the new balance to be set.
+        :param new_balance: (float) representing the new balance to be set.
         """
         self.balance = new_balance
         self.balance_label.configure(text=self.balance)
