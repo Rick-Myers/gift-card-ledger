@@ -4,18 +4,23 @@ import tkinter as tk
 
 
 class GiftCard(tk.Label):
-    """The gift card is a label. It keeps track of gift card related data such as
-    the starting balance. It also keeps track of two tkinter labels. The balance
-     label is used to display the gift cards balance in a separate column.
+
     """
+
+    The gift card is a label. It keeps track of gift card related data such as
+    the starting balance. It also keeps track of two tkinter labels. The balance
+    label is used to display the gift cards balance in a separate column.
+
+    """
+
     def __init__(self, master, name, balance, number, history, starting_balance):
         """
-        parameter: master (TK) - the window that called this window
-        parameter: name (str) - gift card company name
-        parameter: balance (float) - gift card current balance
-        parameter: number (int) - the number used to identify the card with the company that it belongs too
-        parameter: history (str) - history of all transactions
-        parameter: starting_balance (float) 
+        :param master: (tkinter) The window that this widget will be displayed in.
+        :param name: (str) The name of the company that the gift card belongs too.
+        :param balance: (float) Current balance.
+        :param number: (int) Identification number found on the front of the card.
+        :param history: (str) History of all transactions.
+        :param starting_balance: (float) Stores starting balance so that it does not need to be calculated.
         """
         self.master = master
         self.name = name
@@ -27,42 +32,45 @@ class GiftCard(tk.Label):
         super().__init__(master, text=name, bg="lightgrey", fg="black", pady=10, anchor=tk.W)
 
     def _create_label(self):
-
+        """:return: A tkinter Label formatted to display the current balance of the gift card."""
         return tk.Label(self.master, text=self.formatted_balance(), anchor='e')
 
     def update_balance(self, new_balance):
-        """Updates the balance by given balance and updated associated balance label.
-        This will update the cards balance (and its associated label) and the balance
-        label.
-        parameter: new_balance (float)"""
+        """
+        Updates the card's balance and label to be equal to the given balance.
+
+        :param new_balance: float representing the new balance to be set.
+        """
         self.balance = new_balance
         self.balance_label.configure(text=self.formatted_balance())
 
     def formatted_balance(self):
-        """Returns the current balance in a string that is formatted for printing as currency.
-        return: string
-        example: if self.balance == 3.0 then format_balance() == $3.00"""
+        """:return: (str) The current balance in a string that is formatted for printing as currency."""
         formatted_balance = '${:,.2f}'.format(float(self.balance))
         return str(formatted_balance)
 
     @staticmethod
     def format_balance(balance):
-        """This function will convert a given float/integer into a string that is
-        formatted for printing as currency.
-        parameter: balance (float)
-        return: string
-        example: format_balance(3.0) == $3.00"""
+        """
+        Converts a given float/integer into a string that is formatted for printing as currency.
+
+        :param balance: (float) The balance to be formatted.
+        :return: A string representing the balance formatted to a standard US currency. For example, "$3.00".
+        """
         formatted_balance = '${:,.2f}'.format(float(balance))
         return str(formatted_balance)
 
     def destroy(self):
+        """This is called to remove a gift card from view. The gift card label is destroyed
+        and the gift card's balance label is also destroyed."""
         self.balance_label.destroy()
         super().destroy()
 
-    def edit_name(self, new_name):
-        self.name = new_name
-        self.configure(text=self.name)
-
     def update_the_balance(self, new_balance):
+        """
+        This will update the current balance of the card and its corresponding label.
+
+        :param new_balance: float representing the new balance to be set.
+        """
         self.balance = new_balance
         self.balance_label.configure(text=self.balance)
