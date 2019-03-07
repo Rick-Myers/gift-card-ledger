@@ -2,12 +2,19 @@ __author__ = "Rick Myers"
 
 import tkinter as tk
 import tkinter.scrolledtext as tkscrolled
-import sqlite3
+import copy
 from GiftCard import GiftCard
 from datetime import date
-import copy
+
 
 class EditCardDialog(tk.Toplevel):
+
+    """
+    The is a window that can be used to edit a gift card's balance and view gift card
+    information. It displays the card name, balance, starting balance, and any history
+    of transactions.
+    """
+
     def __init__(self, parent, card, title=None):
         tk.Toplevel.__init__(self, parent)
         self.transient(parent)
@@ -66,7 +73,17 @@ class EditCardDialog(tk.Toplevel):
         main_frame.grid(sticky=tk.NSEW)
         main_frame.columnconfigure(0, weight=1)
 
-        self.buttonbox()
+        # Button frame setup
+        box = tk.Frame(self)
+
+        w = tk.Button(box, text="Save", width=10, command=self.ok, default=tk.ACTIVE)
+        w.grid(padx=5, pady=5)
+        w = tk.Button(box, text="Cancel", width=10, command=self.cancel)
+        w.grid(row=0, column=1, padx=5, pady=5)
+
+        self.bind("<Escape>", self.cancel)
+
+        box.grid()
 
         self.grab_set()
         self.initial_focus = self.balance_entry
@@ -80,37 +97,35 @@ class EditCardDialog(tk.Toplevel):
 
         self.initial_focus.focus_set()
 
-        self.result = None
-
-        #
-        # construction hooks
-
     def _update_balance(self, event=None):
+        """
+        Updates the current displayed balance and history for the card within the window.
+        The entries will not be saved until the user clicks save. The changes are purely
+        visual.
+
+        :param event: The event triggered by pressing <Return> in the edit balance entry.
+        :return:
+        """
+        # Deduct spent from current balance.
         self.new_balance -= float(self.balance_entry.get())
         f_balance = GiftCard.format_balance(self.new_balance)
         self.balance_label.configure(text=f_balance)
         self.balance_entry.delete(0, tk.END)
+        # Add updated history to card
         new_history = str(date.today()) + " -> {}".format(f_balance + "\n")
         self.new_history += new_history
-        print(self.new_history)
         self.history_txt.config(state=tk.NORMAL)
         self.history_txt.delete(1.0, tk.END)
         self.history_txt.insert(1.0, self.new_history)
         self.history_txt.config(state=tk.DISABLED)
 
-    def buttonbox(self):
-        box = tk.Frame(self)
-
-        w = tk.Button(box, text="Save", width=10, command=self.ok, default=tk.ACTIVE)
-        w.grid(padx=5, pady=5)
-        w = tk.Button(box, text="Cancel", width=10, command=self.cancel)
-        w.grid(row=0, column=1, padx=5, pady=5)
-
-        self.bind("<Escape>", self.cancel)
-
-        box.grid()
-
     def ok(self, event=None):
+        """
+        Insures the data entered is valid before saving to db and returning to previous windows.
+
+        :param event: The event triggered by clicking the save button.
+        :return:
+        """
         if not self.validate():
             self.initial_focus.focus_set()
             return
@@ -123,12 +138,28 @@ class EditCardDialog(tk.Toplevel):
         self.cancel()
 
     def cancel(self, event=None):
+        """
+        Sets the focus back to the parent window and destroys self.
+        :param event:
+        :return:
+        """
         self.parent.focus_set()
         self.destroy()
 
     def validate(self):
+        """
+        Insures that the data entered in balance entry is a float. The balance
+        entered can be positive or negative.
+
+        :return: (bool) True if data entered is valid, false otherwise.
+        """
         return 1  # override
 
     def apply(self):
+        """
+        This is only called after the data entered has been validated.
+        :return: (tuple) containing the new balance and any new history that
+        needs to be saved to the DB and updated on the main window.
+        """
         self.result = (self.new_balance, self.new_history)
         return self.result
