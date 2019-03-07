@@ -34,12 +34,14 @@ class GiftCard(tk.Label):
         super().__init__(master, text=name, bg="lightgrey", fg="black", pady=10, anchor=tk.W)
 
     def _create_label(self):
-        """:return: A tkinter Label formatted to display the current balance of the gift card."""
+        """Return a label that will be used to display the current balance.
+
+        :return: (Label) formatted to display the current balance of the gift card.
+        """
         return tk.Label(self.master, text=self.formatted_balance(), anchor='e')
 
     def update_balance(self, new_balance):
-        """
-        Updates the card's balance and label to be equal to the given balance.
+        """Update the card's balance and label to be equal to the given balance.
 
         :param new_balance: (float) representing the new balance to be set.
         """
@@ -47,14 +49,23 @@ class GiftCard(tk.Label):
         self.balance_label.configure(text=self.formatted_balance())
 
     def formatted_balance(self):
-        """:return: (str) The current balance in a string that is formatted for printing as currency."""
+        """Return a string representation of the current balance.
+
+        :return: (str) formatted for printing as currency.
+        """
         formatted_balance = '${:,.2f}'.format(float(self.balance))
         return str(formatted_balance)
 
+    def destroy(self):
+        """This is called to remove a gift card from view. The gift card label is destroyed
+        and the gift card's balance label is also destroyed.
+        """
+        self.balance_label.destroy()
+        super().destroy()
+
     @staticmethod
     def format_balance(balance):
-        """
-        Converts a given float/integer into a string that is formatted for printing as currency.
+        """Convert a given float/integer into a string and format for printing as currency.
 
         :param balance: (float) The balance to be formatted.
         :return: A string representing the balance formatted to a standard US currency. For example, "$3.00".
@@ -62,17 +73,4 @@ class GiftCard(tk.Label):
         formatted_balance = '${:,.2f}'.format(float(balance))
         return str(formatted_balance)
 
-    def destroy(self):
-        """This is called to remove a gift card from view. The gift card label is destroyed
-        and the gift card's balance label is also destroyed."""
-        self.balance_label.destroy()
-        super().destroy()
 
-    def update_the_balance(self, new_balance):
-        """
-        This will update the current balance of the card and its corresponding label.
-
-        :param new_balance: (float) representing the new balance to be set.
-        """
-        self.balance = new_balance
-        self.balance_label.configure(text=self.balance)
