@@ -52,6 +52,7 @@ class GiftCardLedger(tk.Tk):
 
         # Add a canvas into the canvas frame.
         self.card_list_canvas = tk.Canvas(canvas_frame)
+        self.card_list_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
         self.card_list_canvas.grid(row=0, column=0)
 
         # Create a vertical scrollbar linked to the canvas.
@@ -77,7 +78,6 @@ class GiftCardLedger(tk.Tk):
 
         # Set the scrollable region to the height of the cards list canvas bounding box
         # Reconfigure the card list canvas to be the same size as the bounding box
-        # todo set without using hard numbers, height is currently manually set
         w, _ = cards_list_bbox[2], cards_list_bbox[3]
         if w <= 243:
             w = 243
@@ -181,13 +181,20 @@ class GiftCardLedger(tk.Tk):
         self.card_list_canvas.configure(scrollregion=self.card_list_canvas.bbox(tk.ALL))
 
     def add_card_dialog(self):
-        """Open the add card dialog and save results to the database if a card is added."""
+        """Open the add card dialog and save results to the database if a card is added that doesn't exist."""
         dialog = AddCardDialog(self)
         # start new window and wait for it to return before allowing user to edit previous window
         self.wait_window(dialog)
-        # Save card to db, otherwise do nothing.
+        # Save card to db if it doesn't already exist, otherwise do nothing.
         if dialog.result:
-            self.add_card(dialog.result)
+            sql_check_exists = """SELECT * FROM gift_cards
+                                  WHERE name = ? AND number = ?
+                                  """
+            data = (dialog.result[0], dialog.result[2])
+            exists = GiftCardLedger.run_query(sql_check_exists, data, receive=True)
+            # Check if card exists in DB
+            if not exists:
+                self.add_card(dialog.result)
 
     def edit_card_dialog(self, event):
         """
@@ -236,6 +243,14 @@ class GiftCardLedger(tk.Tk):
         """Iterate through card list and recolor all labels"""
         for index, card in enumerate(self.cards_list):
             self.set_card_color(index, card)
+
+    def _on_mousewheel(self, event):
+        """
+        Scroll the canvas up or down by 1 unit when the mouse wheel is scrolled.
+
+        :param event: (tkinter.Event) Triggered when scrolling the mouse wheeel.
+        """
+        self.card_list_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     def set_card_color(self, index, card):
         """
@@ -303,20 +318,3 @@ if __name__ == "__main__":
         GiftCardLedger.initialize_db()
     gift_card_ledger = GiftCardLedger()
     gift_card_ledger.mainloop()
-
-'''
-#used to print a list of font families available on the system.
-from tkinter import Tk, font
-root = Tk()
-print(font.families())
-
-#used to print current bounding box of frame
-print('canvas.cards_list_bbox(tk.ALL): {}'.format(cards_list_bbox))
-
-#used to print column names of specific table
-connection = sqlite3.connect('gift_cards.db')
-    cursor = connection.cursor()
-    cursor.execute("PRAGMA table_info(gift_cards)")
-    print(cursor.fetchall())
-    connection.close()
-'''
