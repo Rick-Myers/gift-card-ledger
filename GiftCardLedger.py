@@ -21,6 +21,10 @@ class GiftCardLedger(tk.Tk):
 
     """
     def __init__(self, *args, **kwargs):
+        """Initialize the root window and create card list view of
+        all cards within db. If this is the first time launching,
+        a blank list will be displayed.
+        """
         tk.Tk.__init__(self, *args, **kwargs)
 
         self.title("Gift Card Ledger")
@@ -89,6 +93,11 @@ class GiftCardLedger(tk.Tk):
         self.bind("<Configure>", self.scroll_region_resize)
 
     def remove_card(self, event=None):
+        """
+        Remove the card from view and delete from database.
+
+        :param event: (tkinter.Event) Triggered when a card is deleted.
+        """
         card = event.widget
         if mbox.askyesno("Are you sure?", "Delete " + card.name + "?"):
             # remove from list
@@ -106,30 +115,30 @@ class GiftCardLedger(tk.Tk):
             self.recolor_cards()
 
     def add_card(self, card_data, from_db=False):
+        """
+        Create and display a gift card. This will create cards that are read in
+        during load, or when a new card is created.
+
+        :param card_data: (tuple) Either length three or five. Three if new, five
+        loaded from db. (name, balance, number, history, starting balance)
+        :param from_db: (bool) True if from db, false otherwise.
+        """
         # the row index is the number of widgets within the first column of the frame
         row_index = len(self.cards_list_frame.grid_slaves(column=0))
-        name = card_data[0]
-        balance = card_data[1]
-        number = card_data[2]
+
+        name, balance, number = (card_data[0], card_data[1], card_data[2])
         # if the cards re from the db, we load their data. If not, we have to create a history and starting balance.
         if from_db:
-            history = card_data[3]
-            starting_balance = card_data[4]
+            history, starting_balance = (card_data[3], card_data[4])
         else:
             starting_balance = balance
             history = str(date.today()) + " -> {}{}".format(GiftCard.format_balance(starting_balance), "\n")
         # create gift card
-        card = GiftCard(self.cards_list_frame,
-                        name,
-                        balance,
-                        number,
-                        history,
-                        starting_balance
-                        )
-        # bind card actions
+        card = GiftCard(self.cards_list_frame, name, balance, number, history, starting_balance)
+        # bind gift card actions
         card.bind("<Button-1>", self.remove_card)
         card.bind("<Button-3>", self.edit_card_dialog)
-        # add card and label to grid
+        # add gift card and label to grid
         self.set_card_color(len(self.cards_list), card)
         card.grid(row=row_index, column=0, sticky=tk.NSEW)
         card.balance_label.grid(row=row_index, column=1, sticky='nws')
@@ -140,6 +149,11 @@ class GiftCardLedger(tk.Tk):
             self.save(card)
 
     def save(self, card):
+        """
+        Save the newly added gift card to the database.
+
+        :param card: (GiftCard) New data to be saved.
+        """
         sql_add_card = """INSERT INTO gift_cards
                           VALUES (?, ?, ?, ?, ?)
                           """
@@ -147,27 +161,44 @@ class GiftCardLedger(tk.Tk):
         self.run_query(sql_add_card, card_data)
 
     def load(self):
+        """
+        Load gift card data from sql database.
+
+        :return: (list) A list of GiftCard objects.
+        """
         sql_load_cards = """SELECT name, balance, number, history, starting_balance
                             FROM gift_cards
                             """
         return self.run_query(sql_load_cards, receive=True)
 
     def scroll_region_resize(self, event=None):
-        """Configure scrolling region to accommodate adding and removing labels to the canvas."""
+        """
+        Configure scrolling region to accommodate adding and removing labels to the canvas.
+        :param event: (tkinter.Event) Triggered when labels are added or removed.
+        """
         self.card_list_canvas.configure(scrollregion=self.card_list_canvas.bbox(tk.ALL))
 
     def add_card_dialog(self):
+        """Open the add card dialog and save results to the database if a card is added."""
         dialog = AddCardDialog(self)
         # start new window and wait for it to return before allowing user to edit previous window
         self.wait_window(dialog)
-        # if the user actually added a new card, save the card.
+        # Save card to db, otherwise do nothing.
         if dialog.result:
             self.add_card(dialog.result)
 
     def edit_card_dialog(self, event):
+        """
+        Open the edit card dialog window and save the results to the database if any changes
+        are made. The window will display the view to allow the user to edit the balance of
+        a gift card. The main window will be inactive until the dialog window is closed.
+
+        :param event: (tkinter.Event) The event triggered by right clicking on a gift card.
+        """
         card = event.widget
         dialog = EditCardDialog(self, card)
         self.wait_window(dialog)
+        # Update card in db, otherwise do nothing.
         if dialog.result:
             self._update_card_db(card, dialog.result[0], dialog.result[1])
 
