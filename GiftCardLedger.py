@@ -228,7 +228,6 @@ class GiftCardLedger(tk.Tk):
                                 WHERE name = ? AND number = ?
                                 """
         data = (new_balance, new_history, card.name, card.number)
-
         self.run_query(sql_update_balance, data)
 
     def update_rows(self):

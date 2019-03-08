@@ -1,5 +1,3 @@
-__author__ = "Rick Myers"
-
 import tkinter as tk
 
 
