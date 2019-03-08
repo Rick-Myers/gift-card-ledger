@@ -36,7 +36,7 @@ class GiftCard(tk.Label):
     def _create_label(self):
         """Return a label that will be used to display the current balance.
 
-        :return: (Label) formatted to display the current balance of the gift card.
+        :return: (tkinter.Label) formatted to display the current balance of the gift card.
         """
         return tk.Label(self.master, text=self.formatted_balance(), anchor='e')
 
