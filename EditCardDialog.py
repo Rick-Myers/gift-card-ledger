@@ -2,6 +2,7 @@ __author__ = "Rick Myers"
 
 import tkinter as tk
 import tkinter.scrolledtext as tkscrolled
+import tkinter.messagebox as mbox
 import copy
 from GiftCard import GiftCard
 from datetime import date
@@ -76,7 +77,7 @@ class EditCardDialog(tk.Toplevel):
         # Button frame setup
         box = tk.Frame(self)
 
-        w = tk.Button(box, text="Save", width=10, command=self.ok, default=tk.ACTIVE)
+        w = tk.Button(box, text="Save", width=10, command=self.save, default=tk.ACTIVE)
         w.grid(padx=5, pady=5)
         w = tk.Button(box, text="Cancel", width=10, command=self.cancel)
         w.grid(row=0, column=1, padx=5, pady=5)
@@ -99,15 +100,19 @@ class EditCardDialog(tk.Toplevel):
 
     def _update_balance(self, event=None):
         """
-        Updates the current displayed balance and history for the card within the window.
+        Update the current displayed balance and history for the card within the window.
         The entries will not be saved until the user clicks save. The changes are purely
         visual.
 
         :param event: The event triggered by pressing <Return> in the edit balance entry.
-        :return:
         """
+        # Validate submitted input
+        update = self.validate()
+        if not update:
+            self.initial_focus.focus_set()
+            return
         # Deduct spent from current balance.
-        self.new_balance -= float(self.balance_entry.get())
+        self.new_balance -= update
         f_balance = GiftCard.format_balance(self.new_balance)
         self.balance_label.configure(text=f_balance)
         self.balance_entry.delete(0, tk.END)
@@ -119,47 +124,44 @@ class EditCardDialog(tk.Toplevel):
         self.history_txt.insert(1.0, self.new_history)
         self.history_txt.config(state=tk.DISABLED)
 
-    def ok(self, event=None):
+    def save(self, event=None):
         """
-        Insures the data entered is valid before saving to db and returning to previous windows.
+        Insure the data entered is valid before saving to db and returning to previous windows.
 
-        :param event: The event triggered by clicking the save button.
-        :return:
+        :param event: (tkinter.Event) The event triggered by clicking the save button.
         """
-        if not self.validate():
-            self.initial_focus.focus_set()
-            return
-
         self.withdraw()
         self.update_idletasks()
-
         self.apply()
-
         self.cancel()
 
     def cancel(self, event=None):
         """
-        Sets the focus back to the parent window and destroys self.
-        :param event:
-        :return:
+        Set the focus back to the parent window and destroys self.
+        :param event: (tkinter.Event) The event triggered by clicking the cancel button.
         """
         self.parent.focus_set()
         self.destroy()
 
     def validate(self):
         """
-        Insures that the data entered in balance entry is a float. The balance
+        Insure that the data entered in balance entry is a float. The balance
         entered can be positive or negative.
 
-        :return: (bool) True if data entered is valid, false otherwise.
+        :return: (bool) False if data entered is valid, (int) new balance otherwise.
         """
-        return 1  # override
+        try:
+            balance = float(self.balance_entry.get())
+        except ValueError:
+            mbox.showerror("Error", "Invalid balance.")
+            return False
+        return balance
 
     def apply(self):
         """
-        This is only called after the data entered has been validated.
+        Save validated results to self.result so that data can be retrieved by
+        parent window.
         :return: (tuple) containing the new balance and any new history that
         needs to be saved to the DB and updated on the main window.
         """
         self.result = (self.new_balance, self.new_history)
-        return self.result
