@@ -20,9 +20,9 @@ class AddCardDialog(SimpleDialog_Grid):
         order to create a gift card. The labels and text entries are then placed into a frame.
 
         :param master: (tk) parent that opened this dialog window."""
-        tk.Label(master, text="Name:", anchor=tk.W).grid(row=0, sticky=tk.NSEW)
-        tk.Label(master, text="Balance:", anchor=tk.W).grid(row=1, sticky=tk.NSEW)
-        tk.Label(master, text="Number:", anchor=tk.W).grid(row=2, sticky=tk.NSEW)
+        tk.Label(master, text="Name:", anchor=tk.W, bg="Light Blue").grid(row=0, sticky=tk.NSEW)
+        tk.Label(master, text="Balance:", anchor=tk.W, bg="Light Blue").grid(row=1, sticky=tk.NSEW)
+        tk.Label(master, text="Number:", anchor=tk.W, bg="Light Blue").grid(row=2, sticky=tk.NSEW)
 
         self.name_entry = tk.Entry(master)
         self.balance_entry = tk.Entry(master)

@@ -14,16 +14,14 @@ class SimpleDialog_Grid(tk.Toplevel):
             self.title(title)
 
         self.parent = parent
-
         self.result = None
 
-        main_frame = tk.Frame(self)
+        main_frame = tk.Frame(self, bg="Light Blue")
         self.initial_focus = self.body(main_frame)
         main_frame.grid(sticky=tk.NSEW)
         main_frame.columnconfigure(0, weight=1)
 
         self.buttonbox()
-
         self.grab_set()
 
         if not self.initial_focus:
@@ -47,7 +45,7 @@ class SimpleDialog_Grid(tk.Toplevel):
         pass
 
     def buttonbox(self):
-        box = tk.Frame(self)
+        box = tk.Frame(self, bg="Light Blue")
 
         w = tk.Button(box, text="OK", width=10, command=self.ok, default=tk.ACTIVE)
         w.grid(padx=5, pady=5)
@@ -66,9 +64,7 @@ class SimpleDialog_Grid(tk.Toplevel):
 
         self.withdraw()
         self.update_idletasks()
-
         self.apply()
-
         self.cancel()
 
     def cancel(self, event=None):
