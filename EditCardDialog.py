@@ -29,39 +29,37 @@ class EditCardDialog(tk.Toplevel):
         self.new_balance = copy.deepcopy(self.card.balance)
         self.new_history = copy.deepcopy(self.card.history)
 
-        main_frame = tk.Frame(self)
+        main_frame = tk.Frame(self, bg="Light Blue")
 
         # Top frame for label and card name
-        label_frame = tk.Frame(self)
+        label_frame = tk.Frame(main_frame, bg="Light Blue", bd=3)
         label_frame.grid(sticky=tk.NSEW)
 
-        top_label_var = tk.StringVar(main_frame)
-        top_label = tk.Label(label_frame, textvar=top_label_var, fg="black", bg="white", font=('Terminal', 20))
-        top_label.grid(row=0, column=0, pady=5, sticky=tk.NSEW)
-        top_label_var.set("Gift Card Ledger")
-
         card_label_var = tk.StringVar(main_frame)
-        card_label = tk.Label(label_frame, textvar=card_label_var, fg="black", bg="white", font=('Terminal', 20))
-        card_label.grid(row=1, column=0, pady=5, sticky=tk.N)
+        card_label = tk.Label(label_frame, textvar=card_label_var, fg="black", bg="Light Blue", font=('Terminal', 20))
+        card_label.grid(column=1, pady=5, sticky=tk.N)
         card_label_var.set(self.card.name)
 
+        label_frame.columnconfigure(0, weight=1)
+        label_frame.columnconfigure(2, weight=1)
+
         # Middle frame for balance information
-        balance_frame = tk.Frame(self)
+        balance_frame = tk.Frame(main_frame, bg="Light Blue", bd=3)
         balance_frame.grid(sticky=tk.NSEW)
 
-        tk.Label(balance_frame, text="Current Balance: ", anchor=tk.W).grid(sticky=tk.NW)
-        self.balance_entry = tk.Entry(balance_frame)
+        tk.Label(balance_frame, text="Current Balance: ", bg="Light Blue", anchor=tk.W).grid(sticky=tk.NW)
+        self.balance_entry = tk.Entry(balance_frame, width=7)
         self.balance_entry.bind("<Return>", self._update_balance)
         self.balance_entry.grid(row=0, column=2, sticky=tk.NE)
-        tk.Label(balance_frame, text="Starting Balance: ", anchor=tk.W).grid(row=1, sticky=tk.NW)
-        self.balance_label = tk.Label(balance_frame, text=self.card.formatted_balance(),
+        tk.Label(balance_frame, text="Starting Balance: ", bg="Light Blue", anchor=tk.W).grid(row=1, sticky=tk.NW)
+        self.balance_label = tk.Label(balance_frame, text=self.card.formatted_balance(), bg="Light Blue",
                                       anchor=tk.W)
         self.balance_label.grid(row=0, column=1, sticky=tk.N)
-        tk.Label(balance_frame, text=GiftCard.format_balance(self.card.starting_balance),
+        tk.Label(balance_frame, text=GiftCard.format_balance(self.card.starting_balance), bg="Light Blue",
                  anchor=tk.W).grid(row=1, column=1, sticky=tk.N)
 
         # Bottom frame to hold card history
-        history_frame = tk.Frame(self)
+        history_frame = tk.Frame(main_frame, bg="Light Blue")
         history_frame.grid(sticky=tk.NSEW)
 
         self.history_txt = tkscrolled.ScrolledText(history_frame, width=24, height=10)
@@ -75,7 +73,7 @@ class EditCardDialog(tk.Toplevel):
         main_frame.columnconfigure(0, weight=1)
 
         # Button frame setup
-        box = tk.Frame(self)
+        box = tk.Frame(main_frame, bg="Light Blue")
 
         w = tk.Button(box, text="Save", width=10, command=self.save, default=tk.ACTIVE)
         w.grid(padx=5, pady=5)
@@ -97,6 +95,7 @@ class EditCardDialog(tk.Toplevel):
                                   parent.winfo_rooty() + 50))
 
         self.initial_focus.focus_set()
+        self.resizable(False, False)
 
     def _update_balance(self, event=None):
         """

@@ -35,6 +35,7 @@ class SimpleDialog_Grid(tk.Toplevel):
                                   parent.winfo_rooty() + 50))
 
         self.initial_focus.focus_set()
+        self.resizable(False, False)
 
         #
         # construction hooks

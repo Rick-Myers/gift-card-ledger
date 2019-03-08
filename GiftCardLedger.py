@@ -92,6 +92,8 @@ class GiftCardLedger(tk.Tk):
         # root window binds
         self.bind("<Configure>", self.scroll_region_resize)
 
+        self.resizable(False, False)
+
     def remove_card(self, event=None):
         """
         Remove the card from view and delete from database.
