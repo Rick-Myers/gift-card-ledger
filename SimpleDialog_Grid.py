@@ -2,8 +2,12 @@ import tkinter as tk
 
 
 class SimpleDialog_Grid(tk.Toplevel):
-    """This formatted version of tkSimpleDialog, but it uses
-    Grid Manager instead of Pack."""
+    """
+
+    This formatted version of tkSimpleDialog, but it uses
+    Grid Manager instead of Pack.
+
+    """
     def __init__(self, parent, title = None):
         tk.Toplevel.__init__(self, parent)
         self.transient(parent)

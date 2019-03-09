@@ -11,9 +11,11 @@ from datetime import date
 class EditCardDialog(tk.Toplevel):
 
     """
+
     The is a window that can be used to edit a gift card's balance and view gift card
     information. It displays the card name, balance, starting balance, and any history
     of transactions.
+
     """
 
     def __init__(self, parent, card, title=None):
@@ -98,8 +100,7 @@ class EditCardDialog(tk.Toplevel):
         self.resizable(False, False)
 
     def _update_balance(self, event=None):
-        """
-        Update the current displayed balance and history for the card within the window.
+        """Update the current displayed balance and history for the card within the window.
         The entries will not be saved until the user clicks save. The changes are purely
         visual.
 
@@ -124,8 +125,7 @@ class EditCardDialog(tk.Toplevel):
         self.history_txt.config(state=tk.DISABLED)
 
     def save(self, event=None):
-        """
-        Insure the data entered is valid before saving to db and returning to previous windows.
+        """Insure the data entered is valid before saving to db and returning to previous windows.
 
         :param event: (tkinter.Event) The event triggered by clicking the save button.
         """
@@ -135,16 +135,15 @@ class EditCardDialog(tk.Toplevel):
         self.cancel()
 
     def cancel(self, event=None):
-        """
-        Set the focus back to the parent window and destroys self.
+        """Set the focus back to the parent window and destroys self.
+
         :param event: (tkinter.Event) The event triggered by clicking the cancel button.
         """
         self.parent.focus_set()
         self.destroy()
 
     def validate(self):
-        """
-        Insure that the data entered in balance entry is a float. The balance
+        """Insure that the data entered in balance entry is a float. The balance
         entered can be positive or negative.
 
         :return: (bool) False if data entered is valid, (int) new balance otherwise.
@@ -157,9 +156,9 @@ class EditCardDialog(tk.Toplevel):
         return balance
 
     def apply(self):
-        """
-        Save validated results to self.result so that data can be retrieved by
+        """Save validated results to self.result so that data can be retrieved by
         parent window.
+
         :return: (tuple) containing the new balance and any new history that
         needs to be saved to the DB and updated on the main window.
         """

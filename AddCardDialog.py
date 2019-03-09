@@ -8,10 +8,12 @@ from SimpleDialog_Grid import SimpleDialog_Grid
 class AddCardDialog(SimpleDialog_Grid):
 
     """
+
     Uses SimpleDialog_Grid instead of tk.simpledialog for inheritance because tk's version uses
     the pack manager. All of the widgets within this app use the grid manager. Three labels,
     three entries are created to form a simple dialog.  The dialog retrieves data from the user
     to create a new card in the db.
+
     """
 
     def body(self, master):
