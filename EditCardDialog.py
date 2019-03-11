@@ -4,6 +4,7 @@ import tkinter as tk
 import tkinter.scrolledtext as tkscrolled
 import tkinter.messagebox as mbox
 import copy
+import typing
 from GiftCard import GiftCard
 from datetime import date
 
@@ -18,7 +19,12 @@ class EditCardDialog(tk.Toplevel):
 
     """
 
-    def __init__(self, parent, card, title=None):
+    def __init__(self, parent: tk, card: GiftCard, title: typing.Optional[str] = None):
+        """
+        :param parent: The parent window that called this window.
+        :param card: The gift card to be edited.
+        :param title: New window title if supplied.
+        """
         tk.Toplevel.__init__(self, parent)
         self.transient(parent)
 
@@ -99,7 +105,7 @@ class EditCardDialog(tk.Toplevel):
         self.initial_focus.focus_set()
         self.resizable(False, False)
 
-    def _update_balance(self, event=None):
+    def _update_balance(self, event: typing.Optional[tk.Event] = None):
         """Update the current displayed balance and history for the card within the window.
         The entries will not be saved until the user clicks save. The changes are purely
         visual.
@@ -124,29 +130,29 @@ class EditCardDialog(tk.Toplevel):
         self.history_txt.insert(1.0, self.new_history)
         self.history_txt.config(state=tk.DISABLED)
 
-    def save(self, event=None):
+    def save(self, event: typing.Optional[tk.Event] = None):
         """Insure the data entered is valid before saving to db and returning to previous windows.
 
-        :param event: (tkinter.Event) The event triggered by clicking the save button.
+        :param event: The event triggered by clicking the save button.
         """
         self.withdraw()
         self.update_idletasks()
         self.apply()
         self.cancel()
 
-    def cancel(self, event=None):
+    def cancel(self, event: typing.Optional[tk.Event] = None):
         """Set the focus back to the parent window and destroys self.
 
-        :param event: (tkinter.Event) The event triggered by clicking the cancel button.
+        :param event: The event triggered by clicking the cancel button.
         """
         self.parent.focus_set()
         self.destroy()
 
-    def validate(self):
+    def validate(self) -> typing.Union[bool, int]:
         """Insure that the data entered in balance entry is a float. The balance
         entered can be positive or negative.
 
-        :return: (bool) False if data entered is valid, (int) new balance otherwise.
+        :return: False if data entered is valid, new balance otherwise.
         """
         try:
             balance = float(self.balance_entry.get())
@@ -155,11 +161,11 @@ class EditCardDialog(tk.Toplevel):
             return False
         return balance
 
-    def apply(self):
+    def apply(self) -> tuple:
         """Save validated results to self.result so that data can be retrieved by
         parent window.
 
-        :return: (tuple) containing the new balance and any new history that
-        needs to be saved to the DB and updated on the main window.
+        :return: The new balance and any new history that needs to be saved to
+        the DB and updated on the main window.
         """
         self.result = (self.new_balance, self.new_history)
