@@ -26,7 +26,7 @@ class GiftCardLedger(tk.Tk):
         all cards within db. If this is the first time launching,
         a blank list will be displayed.
         """
-        tk.Tk.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.title("Gift Card Ledger")
         self.configure(background="Gray")

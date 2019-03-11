@@ -10,7 +10,7 @@ class SimpleDialog_Grid(tk.Toplevel):
 
     """
     def __init__(self, parent: tk.Toplevel, title: typing.Optional[str] = None):
-        tk.Toplevel.__init__(self, parent)
+        super().__init__(parent)
         self.transient(parent)
 
         if title:

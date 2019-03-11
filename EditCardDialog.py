@@ -25,7 +25,7 @@ class EditCardDialog(tk.Toplevel):
         :param card: The gift card to be edited.
         :param title: New window title if supplied.
         """
-        tk.Toplevel.__init__(self, parent)
+        super().__init__(parent)
         self.transient(parent)
 
         if title:
