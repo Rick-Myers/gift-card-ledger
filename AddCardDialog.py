@@ -2,6 +2,7 @@ __author__ = "Rick Myers"
 
 import tkinter as tk
 import tkinter.messagebox as mbox
+import typing
 from SimpleDialog_Grid import SimpleDialog_Grid
 
 
@@ -16,12 +17,12 @@ class AddCardDialog(SimpleDialog_Grid):
 
     """
 
-    def body(self, master):
+    def body(self, master: tk) -> tk.Entry:
         """
         Build the body for the window. The dialog requires three valid inputs in
         order to create a gift card. The labels and text entries are then placed into a frame.
 
-        :param master: (tk) parent that opened this dialog window."""
+        :param master: Parent that opened this dialog window."""
         tk.Label(master, text="Name:", anchor=tk.W, bg="Light Blue").grid(row=0, sticky=tk.NSEW)
         tk.Label(master, text="Balance:", anchor=tk.W, bg="Light Blue").grid(row=1, sticky=tk.NSEW)
         tk.Label(master, text="Number:", anchor=tk.W, bg="Light Blue").grid(row=2, sticky=tk.NSEW)
@@ -42,19 +43,19 @@ class AddCardDialog(SimpleDialog_Grid):
 
     def apply(self):
         """
-        Close the window and return the card data which is then used to create, display,
+        Close the window and save the card data which is then used to create, display,
         and save a gift card to the db.
 
-        :return: (tuple) containing the name, balance, and number to be used to create
+        self.result is set to the name, balance, and number to be used to create
         and save a new gift card.
         """
         self.result = (self.new_name, self.new_balance, self.new_number)
 
-    def validate(self):
+    def validate(self) -> bool:
         """
         Validate user input before allowing to return to the previous window.
 
-        :return: (bool) True if all user input is valid, false otherwise.
+        :return: True if all user input is valid, false otherwise.
         """
         self.new_name = self._validate_name()
         if not self.new_name:
@@ -70,11 +71,11 @@ class AddCardDialog(SimpleDialog_Grid):
 
         return True
 
-    def _validate_name(self):
+    def _validate_name(self) -> typing.Union[bool, str]:
         """
         Validate the input of the name entry.
 
-        :return: (bool) False if incorrect name submitted. (str) otherwise.
+        :return: False if incorrect name submitted, str otherwise.
         """
         name = str(self.name_entry.get())
         if not name:
@@ -84,11 +85,11 @@ class AddCardDialog(SimpleDialog_Grid):
         else:
             return name
 
-    def _validate_balance(self):
+    def _validate_balance(self) -> typing.Union[bool, float]:
         """
         Validate the input of the balance entry.
 
-        :return: (bool) False if incorrect balance submitted. (float) otherwise.
+        :return: False if incorrect balance submitted, float otherwise.
         """
         try:
             balance = float(self.balance_entry.get())
@@ -97,11 +98,11 @@ class AddCardDialog(SimpleDialog_Grid):
             return False
         return balance
 
-    def _validate_number(self):
+    def _validate_number(self) -> typing.Union[bool, int]:
         """
         Validate the input of the number entry.
 
-        :return: (bool) False if incorrect number submitted. (int) otherwise.
+        :return: False if incorrect number submitted, int otherwise.
         """
         try:
             number = int(self.number_entry.get())
