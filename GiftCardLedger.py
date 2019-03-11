@@ -4,6 +4,7 @@ import tkinter as tk
 import tkinter.messagebox as mbox
 import os
 import sqlite3
+import typing
 from GiftCard import GiftCard
 from AddCardDialog import AddCardDialog
 from EditCardDialog import EditCardDialog
@@ -94,11 +95,11 @@ class GiftCardLedger(tk.Tk):
 
         self.resizable(False, False)
 
-    def remove_card(self, event=None):
+    def remove_card(self, event: typing.Optional[tk.Event] = None):
         """
         Remove the card from view and delete from database.
 
-        :param event: (tkinter.Event) Triggered when a card is deleted.
+        :param event: Triggered when a card is deleted.
         """
         card = event.widget
         if mbox.askyesno("Are you sure?", "Delete " + card.name + "?"):
@@ -116,14 +117,14 @@ class GiftCardLedger(tk.Tk):
             self.update_rows()
             self.recolor_cards()
 
-    def add_card(self, card_data, from_db=False):
+    def add_card(self, card_data: tuple, from_db: typing.Optional[bool] = False):
         """
         Create and display a gift card. This will create cards that are read in
         during load, or when a new card is created.
 
-        :param card_data: (tuple) Either length three or five. Three if new, five
+        :param card_data: Either length three or five. Three if new, five
         loaded from db. (name, balance, number, history, starting balance)
-        :param from_db: (bool) True if from db, false otherwise.
+        :param from_db: True if from db, false otherwise.
         """
         # the row index is the number of widgets within the first column of the frame
         row_index = len(self.cards_list_frame.grid_slaves(column=0))
@@ -150,11 +151,11 @@ class GiftCardLedger(tk.Tk):
         if not from_db:
             self.save(card)
 
-    def save(self, card):
+    def save(self, card: GiftCard):
         """
         Save the newly added gift card to the database.
 
-        :param card: (GiftCard) New data to be saved.
+        :param card: New data to be saved.
         """
         sql_add_card = """INSERT INTO gift_cards
                           VALUES (?, ?, ?, ?, ?)
@@ -162,21 +163,21 @@ class GiftCardLedger(tk.Tk):
         card_data = (card.name, card.balance, card.number, card.history, card.starting_balance)
         self.run_query(sql_add_card, card_data)
 
-    def load(self):
+    def load(self) -> list:
         """
         Load gift card data from sql database.
 
-        :return: (list) A list of GiftCard objects.
+        :return: A list of GiftCard data.
         """
         sql_load_cards = """SELECT name, balance, number, history, starting_balance
                             FROM gift_cards
                             """
         return self.run_query(sql_load_cards, receive=True)
 
-    def scroll_region_resize(self, event=None):
+    def scroll_region_resize(self, event: typing.Optional[tk.Event] = None):
         """
         Configure scrolling region to accommodate adding and removing labels to the canvas.
-        :param event: (tkinter.Event) Triggered when labels are added or removed.
+        :param event: Triggered when labels are added or removed.
         """
         self.card_list_canvas.configure(scrollregion=self.card_list_canvas.bbox(tk.ALL))
 
@@ -196,13 +197,13 @@ class GiftCardLedger(tk.Tk):
             if not exists:
                 self.add_card(dialog.result)
 
-    def edit_card_dialog(self, event):
+    def edit_card_dialog(self, event: tk.Event):
         """
         Open the edit card dialog window and save the results to the database if any changes
         are made. The window will display the view to allow the user to edit the balance of
         a gift card. The main window will be inactive until the dialog window is closed.
 
-        :param event: (tkinter.Event) The event triggered by right clicking on a gift card.
+        :param event: Triggered by right clicking on a gift card.
         """
         card = event.widget
         dialog = EditCardDialog(self, card)
@@ -211,13 +212,13 @@ class GiftCardLedger(tk.Tk):
         if dialog.result:
             self._update_card_db(card, dialog.result[0], dialog.result[1])
 
-    def _update_card_db(self, card, new_balance, new_history):
+    def _update_card_db(self, card: tk.Label, new_balance: float, new_history: str):
         """
         Update the card's balance and history, then save changes to db.
 
-        :param card: (Label) GiftCard's label.
-        :param new_balance: (float) New balance that was set in edit card dialog.
-        :param new_history: (str) New history pertaining to card balance changes.
+        :param card: GiftCard's label.
+        :param new_balance: New balance that was set in edit card dialog.
+        :param new_history: New history pertaining to card balance changes.
         """
         card.update_balance(new_balance)
         card.history = new_history
@@ -243,21 +244,21 @@ class GiftCardLedger(tk.Tk):
         for index, card in enumerate(self.cards_list):
             self.set_card_color(index, card)
 
-    def _on_mousewheel(self, event):
+    def _on_mousewheel(self, event: tk.Event):
         """
         Scroll the canvas up or down by 1 unit when the mouse wheel is scrolled.
 
-        :param event: (tkinter.Event) Triggered when scrolling the mouse wheeel.
+        :param event: Triggered when scrolling the mouse wheel.
         """
         self.card_list_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
-    def set_card_color(self, index, card):
+    def set_card_color(self, index: int, card: GiftCard):
         """
         Sets the color of the label and maintains that the colors
         of the listed labels alternate.
 
-        :param index: (int) Current row index.
-        :param card: (Label) GiftCard's label.
+        :param index: Current row index.
+        :param card: GiftCard's label.
         """
         _, card_style_choice = divmod(index, 2)
 
@@ -269,13 +270,13 @@ class GiftCardLedger(tk.Tk):
         card.balance_label.configure(fg=my_scheme_choice["fg"])
 
     @staticmethod
-    def run_query(sql, data=None, receive=None):
+    def run_query(sql: str, data: typing.Optional[str] = None, receive: typing.Optional[bool] = None) -> list:
         """Run all DML components of SQL language.
 
-        :param sql: (str) An SQL query string.
-        :param data: (str) Data needed to complete the SQL query.
-        :param receive: (bool) True if query will produce results, false otherwise.
-        :return: (list) Results of the query.
+        :param sql: An SQL query string.
+        :param data: Data needed to complete the SQL query.
+        :param receive: True if query will produce results, false otherwise.
+        :return: Results of the query.
         """
         db_conn = sqlite3.connect('gift_cards.db')
         db_cursor = db_conn.cursor()
