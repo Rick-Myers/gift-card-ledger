@@ -1,4 +1,5 @@
 import tkinter as tk
+import typing
 
 
 class SimpleDialog_Grid(tk.Toplevel):
@@ -8,7 +9,7 @@ class SimpleDialog_Grid(tk.Toplevel):
     Grid Manager instead of Pack.
 
     """
-    def __init__(self, parent, title = None):
+    def __init__(self, parent: tk.Toplevel, title: typing.Optional[str] = None):
         tk.Toplevel.__init__(self, parent)
         self.transient(parent)
 
@@ -40,7 +41,7 @@ class SimpleDialog_Grid(tk.Toplevel):
         #
         # construction hooks
 
-    def body(self, master):
+    def body(self, master: tk):
         # create dialog body.  return widget that should have
         # initial focus.  this method should be overridden
 
@@ -59,7 +60,7 @@ class SimpleDialog_Grid(tk.Toplevel):
 
         box.grid(row=2, column=0)
 
-    def ok(self, event=None):
+    def ok(self, event: typing.Optional[tk.Event] = None):
         if not self.validate():
             self.initial_focus.focus_set()
             return
@@ -69,11 +70,11 @@ class SimpleDialog_Grid(tk.Toplevel):
         self.apply()
         self.cancel()
 
-    def cancel(self, event=None):
+    def cancel(self, event: typing.Optional[tk.Event] = None):
         self.parent.focus_set()
         self.destroy()
 
-    def validate(self):
+    def validate(self) -> bool:
         return 1  # override
 
     def apply(self):
