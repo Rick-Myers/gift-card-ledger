@@ -5,8 +5,9 @@ import tkinter.scrolledtext as tkscrolled
 import tkinter.messagebox as mbox
 import copy
 import typing
-from GiftCard import GiftCard
 from datetime import date
+
+from GiftCard import GiftCard
 
 
 class EditCardDialog(tk.Toplevel):

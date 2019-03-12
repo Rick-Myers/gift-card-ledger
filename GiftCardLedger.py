@@ -5,10 +5,11 @@ import tkinter.messagebox as mbox
 import os
 import sqlite3
 import typing
+from datetime import date
+
 from GiftCard import GiftCard
 from AddCardDialog import AddCardDialog
 from EditCardDialog import EditCardDialog
-from datetime import date
 
 
 class GiftCardLedger(tk.Tk):

@@ -45,7 +45,7 @@ class SimpleDialog_Grid(tk.Toplevel):
         # create dialog body.  return widget that should have
         # initial focus.  this method should be overridden
 
-        pass
+        raise NotImplemented
 
     def buttonbox(self):
         box = tk.Frame(self, bg="Light Blue")
@@ -79,4 +79,4 @@ class SimpleDialog_Grid(tk.Toplevel):
 
     def apply(self):
 
-        pass  # override
+        raise NotImplemented  # override
