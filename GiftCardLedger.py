@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 __author__ = "Rick Myers"
 
 import tkinter as tk
@@ -136,7 +138,7 @@ class GiftCardLedger(tk.Tk):
             history, starting_balance = (card_data[3], card_data[4])
         else:
             starting_balance = balance
-            history = str(date.today()) + " -> {}{}".format(GiftCard.format_balance(starting_balance), "\n")
+            history = "{} -> {}\n".format(date.today(), GiftCard.format_balance(starting_balance))
         # create gift card
         card = GiftCard(self.cards_list_frame, name, balance, number, history, starting_balance)
         # bind gift card actions
@@ -309,7 +311,7 @@ class GiftCardLedger(tk.Tk):
         sql_insert_card = """INSERT INTO gift_cards
                                 VALUES (?, ?, ?, ?, ?)
                                 """
-        initial_date = str(date.today()) + " -> {}".format("$77.77\n")
+        initial_date = "{} -> {}".format(date.today(), "$77.77\n")
         card = ("Delete Me", 77.77, 7777777, initial_date, 77.77)
         GiftCardLedger.run_query(sql_insert_card, card)
 
