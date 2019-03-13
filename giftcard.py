@@ -28,17 +28,9 @@ class GiftCard(tk.Label):
         self.name = name
         self.balance = balance
         self.starting_balance = starting_balance
-        self.balance_label = self._create_label()
         self.number = number
         self.history = history
         super().__init__(master, text=name, bg="lightgrey", fg="black", pady=10, anchor=tk.W)
-
-    def _create_label(self) -> tk.Label:
-        """Return a label that will be used to display the current balance.
-
-        :return: Formatted to display the current balance of the gift card.
-        """
-        return tk.Label(self.master, text=self.formatted_balance(), anchor='e')
 
     def update_balance(self, new_balance: float):
         """Update the card's balance and label to be equal to the given balance.
@@ -46,7 +38,6 @@ class GiftCard(tk.Label):
         :param new_balance: Representing the new balance to be set.
         """
         self.balance = new_balance
-        self.balance_label.configure(text=self.formatted_balance())
 
     def formatted_balance(self) -> str:
         """Return a string representation of the current balance.
@@ -60,18 +51,15 @@ class GiftCard(tk.Label):
         """This is called to remove a gift card from view. The gift card label is destroyed
         and the gift card's balance label is also destroyed.
         """
-        self.balance_label.destroy()
         super().destroy()
 
     def set_card_color(self, color: dict):
         """
-        Sets the color of the label and maintains that the colors
-        of the listed labels alternate.
+        Sets the color of the label.
 
         :param color: A dictionary containing the background and foreground color to be set.
         """
         self.configure(bg=color["bg"], fg=color["fg"])
-        self.balance_label.configure(bg=color["bg"], fg=color["fg"])
 
     @staticmethod
     def format_balance(balance: float) -> str:

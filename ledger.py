@@ -105,11 +105,19 @@ class GiftCardLedger(tk.Tk):
         :param event: Triggered when a card is deleted.
         """
         card = event.widget
+
+        row_index = card.grid_info()['row']
+        print(self.cards_list_frame.grid_slaves(row=row_index, column=1))
+        balance_label = self.cards_list_frame.grid_slaves(row=row_index, column=1)[0]
+
         if mbox.askyesno("Are you sure?", "Delete " + card.name + "?"):
             # remove from list
             self.cards_list.remove(card)
             # remove from canvas frame
             card.destroy()
+
+            balance_label.destroy()
+
             # remove from db
             sql_remove_card = """DELETE FROM gift_cards
                                  WHERE name=? AND number=?
@@ -139,15 +147,21 @@ class GiftCardLedger(tk.Tk):
         else:
             starting_balance = balance
             history = "{} -> {}\n".format(date.today(), GiftCard.format_balance(starting_balance))
-        # create gift card
+        # create gift card and balance label
         card = GiftCard(self.cards_list_frame, name, balance, number, history, starting_balance)
+        balance_label = tk.Label(self.cards_list_frame, text=GiftCard.format_balance(balance), anchor=tk.E)
         # bind gift card actions
         card.bind("<Button-1>", self.remove_card)
         card.bind("<Button-3>", self.edit_card_dialog)
+
+        # set label and gift card color
+        color = next(self.color_gen)
+        card.set_card_color(color)
+        balance_label.configure(bg=color["bg"], fg=color["fg"])
+
         # add gift card and label to grid
-        card.set_card_color(next(self.color_gen))
         card.grid(row=row_index, column=0, sticky=tk.NSEW)
-        card.balance_label.grid(row=row_index, column=1, sticky='nws')
+        balance_label.grid(row=row_index, column=1, sticky='nws')
         # add to gift card list
         self.cards_list.append(card)
         # insert into db if card didn't come from db
@@ -224,6 +238,8 @@ class GiftCardLedger(tk.Tk):
         :param new_history: New history pertaining to card balance changes.
         """
         card.update_balance(new_balance)
+        balance_label = self._find_balance_label(card)
+        balance_label.configure(text=GiftCard.format_balance(new_balance))
         card.history = new_history
 
         sql_update_balance = """UPDATE gift_cards 
@@ -235,17 +251,20 @@ class GiftCardLedger(tk.Tk):
         self.run_query(sql_update_balance, data)
 
     def update_rows(self):
-        """Iterate through card list and adjust row indices to insure
+        """Iterate through card list and adjust rows for cards and balance labels to insure
         there are no empty spaces."""
-        # todo only update rows underneath the deleted row
         for row_index, card in enumerate(self.cards_list):
+            balance_label = self._find_balance_label(card)
             card.grid(row=row_index)
-            card.balance_label.grid(row=row_index)
+            balance_label.grid(row=row_index)
 
     def recolor_cards(self):
-        """Iterate through card list and recolor all labels"""
+        """Iterate through card list and recolor all labels and cards"""
         for card in self.cards_list:
-            card.set_card_color(next(self.color_gen))
+            color = next(self.color_gen)
+            balance_label = self._find_balance_label(card)
+            card.set_card_color(color)
+            balance_label.configure(bg=color["bg"], fg=color["fg"])
 
     def _on_mousewheel(self, event: tk.Event):
         """
@@ -254,6 +273,11 @@ class GiftCardLedger(tk.Tk):
         :param event: Triggered when scrolling the mouse wheel.
         """
         self.card_list_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+    def _find_balance_label(self, card: GiftCard) -> tk.Label:
+        b_index = card.grid_info()['row']
+        b_label = self.cards_list_frame.grid_slaves(row=b_index, column=1)[0]
+        return b_label
 
     @staticmethod
     def run_query(sql: str, data: typing.Optional[str] = None, receive: typing.Optional[bool] = None) -> list:
