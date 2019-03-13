@@ -63,6 +63,16 @@ class GiftCard(tk.Label):
         self.balance_label.destroy()
         super().destroy()
 
+    def set_card_color(self, color: dict):
+        """
+        Sets the color of the label and maintains that the colors
+        of the listed labels alternate.
+
+        :param color: A dictionary containing the background and foreground color to be set.
+        """
+        self.configure(bg=color["bg"], fg=color["fg"])
+        self.balance_label.configure(bg=color["bg"], fg=color["fg"])
+
     @staticmethod
     def format_balance(balance: float) -> str:
         """Convert a given float/integer into a string and format for printing as currency.

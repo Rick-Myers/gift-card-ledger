@@ -145,7 +145,7 @@ class GiftCardLedger(tk.Tk):
         card.bind("<Button-1>", self.remove_card)
         card.bind("<Button-3>", self.edit_card_dialog)
         # add gift card and label to grid
-        self.set_card_color(card)
+        card.set_card_color(next(self.color_gen))
         card.grid(row=row_index, column=0, sticky=tk.NSEW)
         card.balance_label.grid(row=row_index, column=1, sticky='nws')
         # add to gift card list
@@ -245,7 +245,7 @@ class GiftCardLedger(tk.Tk):
     def recolor_cards(self):
         """Iterate through card list and recolor all labels"""
         for card in self.cards_list:
-            self.set_card_color(card)
+            card.set_card_color(next(self.color_gen))
 
     def _on_mousewheel(self, event: tk.Event):
         """
@@ -254,18 +254,6 @@ class GiftCardLedger(tk.Tk):
         :param event: Triggered when scrolling the mouse wheel.
         """
         self.card_list_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
-
-    def set_card_color(self, card: GiftCard):
-        """
-        Sets the color of the label and maintains that the colors
-        of the listed labels alternate.
-
-        :param card: GiftCard's label.
-        """
-        color = next(self.color_gen)
-
-        card.configure(bg=color["bg"], fg=color["fg"])
-        card.balance_label.configure(bg=color["bg"], fg=color["fg"])
 
     @staticmethod
     def run_query(sql: str, data: typing.Optional[str] = None, receive: typing.Optional[bool] = None) -> list:
