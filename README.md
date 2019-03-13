@@ -3,11 +3,11 @@ A simple gift card ledger app with a GUI built using Tkinter. I wrote a similar 
 
 Main Window:
 
-![main_window](https://user-images.githubusercontent.com/1986092/54063258-659ce300-41d9-11e9-8022-bc391c818be4.PNG)
+![main window](https://user-images.githubusercontent.com/1986092/54285606-ae0d2580-4578-11e9-89ca-7aecd900610c.png)
 
 Edit Window:
 
-![edit_window](https://user-images.githubusercontent.com/1986092/54063436-6124fa00-41da-11e9-8a97-f760eb90d287.PNG)
+![edit_window](https://user-images.githubusercontent.com/1986092/54285665-ca10c700-4578-11e9-90ce-afdca06ae92a.png)
 
 # Main Window Controls
 1. Right click on a card name to open the edit dialog window.
