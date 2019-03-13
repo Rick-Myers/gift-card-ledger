@@ -3,7 +3,6 @@ __author__ = "Rick Myers"
 import tkinter as tk
 from tkinter import ttk
 import tkinter.messagebox as mbox
-import os
 import sqlite3
 import typing
 import itertools
@@ -107,15 +106,14 @@ class GiftCardLedger(tk.Tk):
         card = event.widget
 
         row_index = card.grid_info()['row']
-        print(self.cards_list_frame.grid_slaves(row=row_index, column=1))
         balance_label = self.cards_list_frame.grid_slaves(row=row_index, column=1)[0]
 
         if mbox.askyesno("Are you sure?", "Delete " + card.name + "?"):
             # remove from list
             self.cards_list.remove(card)
+
             # remove from canvas frame
             card.destroy()
-
             balance_label.destroy()
 
             # remove from db
@@ -124,14 +122,15 @@ class GiftCardLedger(tk.Tk):
                                  """
             card_data = (card.name, card.number)
             self.run_query(sql_remove_card, card_data)
-            # update card grid positions and colors
+
+            # update card and label grid positions and colors
             self.update_rows()
-            self.recolor_cards()
+            self.recolor_row()
 
     def add_card(self, card_data: tuple, from_db: typing.Optional[bool] = False):
         """
-        Create and display a gift card. This will create cards that are read in
-        during load, or when a new card is created.
+        Create and display a gift card and its associated balance label. This
+        will create cards that are read in during load, or when a new card is created.
 
         :param card_data: Either length three or five. Three if new, five
         loaded from db. (name, balance, number, history, starting balance)
@@ -147,9 +146,11 @@ class GiftCardLedger(tk.Tk):
         else:
             starting_balance = balance
             history = "{} -> {}\n".format(date.today(), GiftCard.format_balance(starting_balance))
+
         # create gift card and balance label
         card = GiftCard(self.cards_list_frame, name, balance, number, history, starting_balance)
         balance_label = tk.Label(self.cards_list_frame, text=GiftCard.format_balance(balance), anchor=tk.E)
+
         # bind gift card actions
         card.bind("<Button-1>", self.remove_card)
         card.bind("<Button-3>", self.edit_card_dialog)
@@ -162,8 +163,10 @@ class GiftCardLedger(tk.Tk):
         # add gift card and label to grid
         card.grid(row=row_index, column=0, sticky=tk.NSEW)
         balance_label.grid(row=row_index, column=1, sticky='nws')
+
         # add to gift card list
         self.cards_list.append(card)
+
         # insert into db if card didn't come from db
         if not from_db:
             self.save(card)
@@ -258,7 +261,7 @@ class GiftCardLedger(tk.Tk):
             card.grid(row=row_index)
             balance_label.grid(row=row_index)
 
-    def recolor_cards(self):
+    def recolor_row(self):
         """Iterate through card list and recolor all labels and cards"""
         for card in self.cards_list:
             color = next(self.color_gen)
@@ -275,6 +278,11 @@ class GiftCardLedger(tk.Tk):
         self.card_list_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     def _find_balance_label(self, card: GiftCard) -> tk.Label:
+        """
+
+        :param card: GiftCard positioned to the left of the balance label.
+        :return: Balance label found in the same row as the GiftCard
+        """
         b_index = card.grid_info()['row']
         b_label = self.cards_list_frame.grid_slaves(row=b_index, column=1)[0]
         return b_label
