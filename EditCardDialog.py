@@ -3,6 +3,7 @@ __author__ = "Rick Myers"
 import tkinter as tk
 import tkinter.scrolledtext as tkscrolled
 import tkinter.messagebox as mbox
+from tkinter import ttk
 import copy
 import typing
 from datetime import date
@@ -84,9 +85,9 @@ class EditCardDialog(tk.Toplevel):
         # Button frame setup
         box = tk.Frame(main_frame, bg="Light Blue")
 
-        w = tk.Button(box, text="Save", width=10, command=self.save, default=tk.ACTIVE)
+        w = ttk.Button(box, text="Save", width=10, command=self.save, default=tk.ACTIVE)
         w.grid(padx=5, pady=5)
-        w = tk.Button(box, text="Cancel", width=10, command=self.cancel)
+        w = ttk.Button(box, text="Cancel", width=10, command=self.cancel)
         w.grid(row=0, column=1, padx=5, pady=5)
 
         self.bind("<Escape>", self.cancel)

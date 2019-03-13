@@ -3,10 +3,12 @@
 __author__ = "Rick Myers"
 
 import tkinter as tk
+from tkinter import ttk
 import tkinter.messagebox as mbox
 import os
 import sqlite3
 import typing
+import itertools
 from datetime import date
 
 from GiftCard import GiftCard
@@ -90,7 +92,7 @@ class GiftCardLedger(tk.Tk):
         # Button for adding a new card and the frame it is in.
         buttons_frame = tk.Frame(main_frame, bd=2, relief=tk.GROOVE)
         buttons_frame.grid(row=5, column=0, pady=5, sticky=tk.SE)
-        add_card_button = tk.Button(buttons_frame, text="Add Card", command=self.add_card_dialog)
+        add_card_button = ttk.Button(buttons_frame, text="Add Card", command=self.add_card_dialog)
         add_card_button.grid(row=0, column=0)
 
         # root window binds
