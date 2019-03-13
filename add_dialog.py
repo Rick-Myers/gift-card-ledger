@@ -4,10 +4,10 @@ import tkinter as tk
 import tkinter.messagebox as mbox
 import typing
 
-from SimpleDialog_Grid import SimpleDialog_Grid
+from simple_dialog import SimpleDialogGrid
 
 
-class AddCardDialog(SimpleDialog_Grid):
+class AddCardDialog(SimpleDialogGrid):
 
     """
 

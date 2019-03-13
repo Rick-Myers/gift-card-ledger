@@ -8,7 +8,7 @@ import copy
 import typing
 from datetime import date
 
-from GiftCard import GiftCard
+from giftcard import GiftCard
 
 
 class EditCardDialog(tk.Toplevel):

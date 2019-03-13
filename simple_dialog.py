@@ -3,7 +3,7 @@ from tkinter import ttk
 import typing
 
 
-class SimpleDialog_Grid(tk.Toplevel):
+class SimpleDialogGrid(tk.Toplevel):
     """
 
     This formatted version of tkSimpleDialog, but it uses

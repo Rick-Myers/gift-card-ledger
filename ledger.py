@@ -11,9 +11,9 @@ import typing
 import itertools
 from datetime import date
 
-from GiftCard import GiftCard
-from AddCardDialog import AddCardDialog
-from EditCardDialog import EditCardDialog
+from giftcard import GiftCard
+from add_dialog import AddCardDialog
+from edit_dialog import EditCardDialog
 
 
 class GiftCardLedger(tk.Tk):
