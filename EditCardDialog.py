@@ -125,7 +125,7 @@ class EditCardDialog(tk.Toplevel):
         self.balance_label.configure(text=f_balance)
         self.balance_entry.delete(0, tk.END)
         # Add updated history to card
-        new_history = str(date.today()) + " -> {}".format(f_balance + "\n")
+        new_history = "{} -> {}\n".format(date.today(), f_balance)
         self.new_history += new_history
         self.history_txt.config(state=tk.NORMAL)
         self.history_txt.delete(1.0, tk.END)

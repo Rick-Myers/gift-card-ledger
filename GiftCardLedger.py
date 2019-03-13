@@ -38,7 +38,7 @@ class GiftCardLedger(tk.Tk):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.cards_list = []
-        self.color_schemes = [{"bg": "lightgrey", "fg": "black"}, {"bg": "grey", "fg": "white"}]
+        self.color_gen = itertools.cycle([{"bg": "lightgrey", "fg": "black"}, {"bg": "grey", "fg": "white"}])
 
         # Create main window frame
         main_frame = tk.Frame(self, bg="Light Blue", bd=3, relief=tk.RIDGE)
@@ -147,7 +147,7 @@ class GiftCardLedger(tk.Tk):
         card.bind("<Button-1>", self.remove_card)
         card.bind("<Button-3>", self.edit_card_dialog)
         # add gift card and label to grid
-        self.set_card_color(len(self.cards_list), card)
+        self.set_card_color(card)
         card.grid(row=row_index, column=0, sticky=tk.NSEW)
         card.balance_label.grid(row=row_index, column=1, sticky='nws')
         # add to gift card list
@@ -246,8 +246,8 @@ class GiftCardLedger(tk.Tk):
 
     def recolor_cards(self):
         """Iterate through card list and recolor all labels"""
-        for index, card in enumerate(self.cards_list):
-            self.set_card_color(index, card)
+        for card in self.cards_list:
+            self.set_card_color(card)
 
     def _on_mousewheel(self, event: tk.Event):
         """
@@ -257,22 +257,17 @@ class GiftCardLedger(tk.Tk):
         """
         self.card_list_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
-    def set_card_color(self, index: int, card: GiftCard):
+    def set_card_color(self, card: GiftCard):
         """
         Sets the color of the label and maintains that the colors
         of the listed labels alternate.
 
-        :param index: Current row index.
         :param card: GiftCard's label.
         """
-        _, card_style_choice = divmod(index, 2)
+        color = next(self.color_gen)
 
-        my_scheme_choice = self.color_schemes[card_style_choice]
-
-        card.configure(bg=my_scheme_choice["bg"])
-        card.configure(fg=my_scheme_choice["fg"])
-        card.balance_label.configure(bg=my_scheme_choice["bg"])
-        card.balance_label.configure(fg=my_scheme_choice["fg"])
+        card.configure(bg=color["bg"], fg=color["fg"])
+        card.balance_label.configure(bg=color["bg"], fg=color["fg"])
 
     @staticmethod
     def run_query(sql: str, data: typing.Optional[str] = None, receive: typing.Optional[bool] = None) -> list:
