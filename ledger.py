@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 __author__ = "Rick Myers"
 
 import tkinter as tk
@@ -311,10 +309,3 @@ class GiftCardLedger(tk.Tk):
         initial_date = "{} -> {}".format(date.today(), "$77.77\n")
         card = ("Delete Me", 77.77, 7777777, initial_date, 77.77)
         GiftCardLedger.run_query(sql_insert_card, card)
-
-
-if __name__ == "__main__":
-    if not os.path.isfile('gift_cards.db'):
-        GiftCardLedger.initialize_db()
-    gift_card_ledger = GiftCardLedger()
-    gift_card_ledger.mainloop()
